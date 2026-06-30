@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
+  --font-playfair: "Playfair Display", serif;
+  --font-fira: "Fira Code", monospace;
+  
+  --color-brand-primary: #6366f1;
+  --color-brand-secondary: #4f46e5;
+  --color-dark-bg: #0b0f19;
+  --color-dark-card: #151b2c;
+  --color-dark-border: #232c45;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* A4/Letter size preview sheet styles */
+.resume-preview-sheet {
+  aspect-ratio: 1 / 1.4142; /* A4 aspect ratio */
+  width: 100%;
+  background: white;
+  color: black;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Print styles */
+@media print {
+  html, body {
+    height: auto;
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    aspect-ratio: auto !important;
+    height: auto !important;
+  }
+
+  /* Prevent page breaks inside sections */
+  .print-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Reset colors to standard black/white print friendly if requested,
+     but we preserve background-colors/borders using print-color-adjust */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Smooth custom details animations */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.accordion-content.open {
+  max-height: 1000px;
+  transition: max-height 0.25s ease-in;
+}
+
+/* Custom interactive dots */
+.glow-effect:hover {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
