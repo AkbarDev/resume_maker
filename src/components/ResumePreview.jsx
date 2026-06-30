@@ -1,3 +1,4 @@
+import React from "react";
 import { Mail, Phone, MapPin, Globe, ExternalLink } from "lucide-react";
 import { FONTS, SIZES } from "../types/resume";
 
@@ -40,62 +41,96 @@ const Github = ({ size = 16, className = "" }) => (
 
 export default function ResumePreview({ data, isPrintView = false }) {
   const { personalInfo, experience, education, projects, skills, certifications, layoutSettings } = data;
-  const { template, primaryColor, accentColor, fontSize, spacing, fontFamily } = layoutSettings;
+  const { 
+    template, primaryColor, accentColor, fontSize, spacing, fontFamily,
+    sectionOrder = ["summary", "experience", "education", "projects", "skills", "certifications"],
+    lineHeight = "normal", // tight, normal, relaxed
+    marginSize = "normal" // compact, normal, loose
+  } = layoutSettings;
 
-  // Retrieve current font details
   const fontConfig = FONTS[fontFamily] || FONTS.sans;
   const sizeConfig = SIZES[fontSize] || SIZES.sm;
 
-  // Spacing map
-  const spacingClass = {
-    compact: {
-      gap: "gap-1",
-      itemGap: "gap-0.5",
-      secGap: "space-y-2",
-      sectionMargin: "mb-3",
-      padding: "p-6",
-      divider: "my-1.5"
-    },
-    normal: {
-      gap: "gap-2",
-      itemGap: "gap-1.5",
-      secGap: "space-y-4",
-      sectionMargin: "mb-5",
-      padding: "p-8",
-      divider: "my-3"
-    },
-    loose: {
-      gap: "gap-3",
-      itemGap: "gap-2.5",
-      secGap: "space-y-6",
-      sectionMargin: "mb-7",
-      padding: "p-10",
-      divider: "my-4.5"
-    }
+  // Custom margin map
+  const marginClass = {
+    compact: "mb-2.5",
+    normal: "mb-4.5",
+    loose: "mb-7"
+  }[marginSize];
+
+  // Custom line height map
+  const leadingClass = {
+    tight: "leading-tight",
+    normal: "leading-normal",
+    relaxed: "leading-relaxed"
+  }[lineHeight];
+
+  // Spacing padding map
+  const paddingClass = {
+    compact: "p-6",
+    normal: "p-8",
+    loose: "p-10"
   }[spacing];
 
-  // Helper to color headers
+  // Helper colors style objects
   const primaryStyle = { color: primaryColor };
   const borderPrimaryStyle = { borderColor: primaryColor };
   const accentStyle = { color: accentColor };
+  const borderAccentStyle = { borderColor: accentColor };
   const bgPrimaryStyle = { backgroundColor: primaryColor };
+  const bgAccentStyle = { backgroundColor: accentColor };
 
-  // Helper to format text with newlines (like bullet points)
+  // Initials badge builder
+  const renderInitialsBadge = (sizeClass = "w-11 h-11 text-xs") => {
+    const first = personalInfo.firstName?.[0] || "";
+    const last = personalInfo.lastName?.[0] || "";
+    if (!first && !last) return null;
+    return (
+      <div 
+        className={`${sizeClass} rounded-full flex items-center justify-center font-extrabold text-white shrink-0 shadow-sm uppercase`}
+        style={bgPrimaryStyle}
+      >
+        {first}{last}
+      </div>
+    );
+  };
+
+  // Convert bullet points text to list
   const renderBulletPoints = (text) => {
     if (!text) return null;
     return text.split("\n").map((line, idx) => {
       const trimmed = line.trim();
       if (!trimmed) return null;
-      // If it already has a bullet, don't double bullet
       const displayLine = trimmed.startsWith("•") || trimmed.startsWith("-") 
         ? trimmed.substring(1).trim() 
         : trimmed;
       return (
-        <li key={idx} className="leading-relaxed list-none relative pl-4 before:content-['•'] before:absolute before:left-0 before:text-gray-400">
+        <li key={idx} className={`${leadingClass} text-gray-700 list-none relative pl-4 before:content-['•'] before:absolute before:left-0 before:text-gray-400`}>
           {displayLine}
         </li>
       );
     });
+  };
+
+  // Convert comma separated list of skills to styled pills
+  const renderSkillPills = (itemsText) => {
+    if (!itemsText) return null;
+    return (
+      <div className="flex flex-wrap gap-1.5 mt-1.5">
+        {itemsText.split(",").map((s, i) => {
+          const trimmed = s.trim();
+          if (!trimmed) return null;
+          return (
+            <span 
+              key={i} 
+              className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-50 text-gray-700 border border-gray-200"
+            >
+              {trimmed}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   const hasPersonalInfo = personalInfo.firstName || personalInfo.lastName;
@@ -105,363 +140,202 @@ export default function ResumePreview({ data, isPrintView = false }) {
   const hasSkills = skills.length > 0 && skills.some(s => s.category || s.items);
   const hasCertifications = certifications.length > 0 && certifications.some(c => c.name);
 
-  // Layout Renders
+  // Sub-Sections Render Map
   // ----------------------------------------------------
-  // TEMPLATE 1: Harvard Classic (ATS-perfect, center aligned)
-  const renderClassicTemplate = () => {
+  const renderSummarySection = () => {
+    if (!personalInfo.summary) return null;
     return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${spacingClass.padding} flex flex-col`}>
+      <div className={`print-section ${marginClass}`}>
+        {template !== "classic" && (
+          <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-2 flex items-center gap-2`}>
+            <span className="w-1 h-3 rounded" style={bgAccentStyle} /> Professional Summary
+          </h2>
+        )}
+        <p className={`${leadingClass} text-gray-700 text-justify text-xs`}>{personalInfo.summary}</p>
+      </div>
+    );
+  };
+
+  const renderExperienceSection = () => {
+    if (!hasExperience) return null;
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
+          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Professional Experience
+        </h2>
+        
+        {/* Timeline representation for Modern/Minimal templates */}
+        <div className={template === "modern" || template === "minimal" ? "relative border-l-2 ml-1.5 pl-5 space-y-4" : "space-y-4"}>
+          {experience.map((exp, idx) => (
+            <div key={exp.id} className="relative text-xs">
+              
+              {/* Timeline Connector Node */}
+              {(template === "modern" || template === "minimal") && (
+                <div 
+                  className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm"
+                  style={{ backgroundColor: accentColor }}
+                />
+              )}
+
+              <div className="flex flex-wrap justify-between items-baseline font-bold text-gray-900">
+                <span className="text-[13px]">{exp.role} <span className="font-normal text-gray-500">| {exp.company}</span></span>
+                <span className="text-[10px] font-semibold uppercase shrink-0" style={accentStyle}>{exp.startDate} – {exp.endDate || "Present"}</span>
+              </div>
+              {exp.location && <div className="text-gray-500 italic text-[10px] mb-1">{exp.location}</div>}
+              
+              <ul className="list-disc pl-3.5 space-y-0.5 mt-1.5 text-gray-700">
+                {renderBulletPoints(exp.description)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEducationSection = () => {
+    if (!hasEducation) return null;
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
+          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Education
+        </h2>
+        <div className="space-y-3">
+          {education.map((edu) => (
+            <div key={edu.id} className="text-xs">
+              <div className="flex justify-between font-bold text-gray-900">
+                <span>{edu.degree} in {edu.fieldOfStudy}</span>
+                <span className="font-semibold text-[10px]" style={accentStyle}>{edu.graduationDate}</span>
+              </div>
+              <div className="flex justify-between text-gray-600 italic">
+                <span>{edu.institution}</span>
+                {edu.location && <span>{edu.location}</span>}
+              </div>
+              {edu.details && <p className="text-gray-500 mt-1 leading-relaxed">{edu.details}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderProjectsSection = () => {
+    if (!hasProjects) return null;
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
+          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Featured Projects
+        </h2>
+        <div className="space-y-3">
+          {projects.map((proj) => (
+            <div key={proj.id} className="text-xs">
+              <div className="flex justify-between items-baseline font-bold text-gray-900">
+                <span>
+                  {proj.title}
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-gray-600">
+                      <ExternalLink size={10} />
+                    </a>
+                  )}
+                </span>
+                {proj.techStack && <span className="text-[10px] font-normal text-gray-500 italic shrink-0">{proj.techStack}</span>}
+              </div>
+              <ul className="list-disc pl-3.5 space-y-0.5 mt-1.5 text-gray-700">
+                {renderBulletPoints(proj.description)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderSkillsSection = () => {
+    if (!hasSkills) return null;
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
+          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Skills & Expertise
+        </h2>
+        <div className="space-y-2.5 text-xs">
+          {skills.map((skill) => (
+            <div key={skill.id} className="flex flex-col sm:flex-row sm:items-start gap-1">
+              <span className="font-bold text-gray-900 w-36 shrink-0 text-[11px]">{skill.category}:</span>
+              <div className="flex-1">
+                {template === "classic" ? <span className="text-gray-700">{skill.items}</span> : renderSkillPills(skill.items)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCertificationsSection = () => {
+    if (!hasCertifications) return null;
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
+          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Certifications
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          {certifications.map((cert) => (
+            <div key={cert.id} className="flex justify-between text-gray-700 bg-gray-50/50 p-2 rounded border border-gray-100/80">
+              <div>
+                <span className="font-semibold text-gray-900">{cert.name}</span>
+                <span className="text-gray-500 block text-[10px]">{cert.issuer}</span>
+              </div>
+              <span className="text-gray-500 shrink-0 text-[10px] font-semibold">{cert.date}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Sections Dispatch Router
+  const renderSectionByOrder = (sectionName) => {
+    switch (sectionName) {
+      case "summary":
+        return renderSummarySection();
+      case "experience":
+        return renderExperienceSection();
+      case "education":
+        return renderEducationSection();
+      case "projects":
+        return renderProjectsSection();
+      case "skills":
+        return renderSkillsSection();
+      case "certifications":
+        return renderCertificationsSection();
+      default:
+        return null;
+    }
+  };
+
+  // LAYOUT SELECTORS
+  // ----------------------------------------------------
+  
+  // TEMPLATE 1: Harvard Classic (Center Aligned, Serif, Initials Badge)
+  const renderClassic = () => {
+    return (
+      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
         {/* Header */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 flex flex-col items-center">
+          
+          {/* Centered Initials Badge */}
+          <div className="mb-2">
+            {renderInitialsBadge("w-14 h-14 text-sm")}
+          </div>
+
           <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-wide text-gray-900 mb-1`} style={primaryStyle}>
             {personalInfo.firstName} {personalInfo.lastName}
           </h1>
-          <p className="text-gray-600 font-medium tracking-wider uppercase text-xs">
-            {personalInfo.title}
-          </p>
-          
-          {/* Metadata Grid */}
-          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs text-gray-500 mt-2 font-medium">
-            {personalInfo.location && <span className="flex items-center gap-0.5"><MapPin size={11} /> {personalInfo.location}</span>}
-            {personalInfo.phone && <span className="flex items-center gap-0.5"><Phone size={11} /> {personalInfo.phone}</span>}
-            {personalInfo.email && <span className="flex items-center gap-0.5"><Mail size={11} /> {personalInfo.email}</span>}
-            {personalInfo.website && (
-              <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                <Globe size={11} /> {personalInfo.website.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-            {personalInfo.linkedin && (
-              <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                <Linkedin size={11} /> {personalInfo.linkedin.replace(/^linkedin\.com\/in\//, "")}
-              </a>
-            )}
-            {personalInfo.github && (
-              <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                <Github size={11} /> {personalInfo.github.replace(/^github\.com\//, "")}
-              </a>
-            )}
-          </div>
-        </div>
-
-        <div className={spacingClass.secGap}>
-          {/* Summary */}
-          {personalInfo.summary && (
-            <div className="print-section">
-              <p className="text-gray-700 leading-relaxed text-justify">{personalInfo.summary}</p>
-            </div>
-          )}
-
-          {/* Experience */}
-          {hasExperience && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} uppercase tracking-wider border-b pb-0.5 mb-2`} style={primaryStyle}>
-                Professional Experience
-              </h2>
-              <div className="space-y-3">
-                {experience.map((exp) => (
-                  <div key={exp.id} className="text-xs">
-                    <div className="flex justify-between font-bold text-gray-900">
-                      <span>{exp.role} <span className="font-normal text-gray-500">| {exp.company}</span></span>
-                      <span>{exp.startDate} – {exp.endDate || "Present"}</span>
-                    </div>
-                    {exp.location && <div className="text-gray-500 italic mb-1">{exp.location}</div>}
-                    <ul className="list-disc pl-4 text-gray-700 space-y-0.5 mt-1">
-                      {renderBulletPoints(exp.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Education */}
-          {hasEducation && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} uppercase tracking-wider border-b pb-0.5 mb-2`} style={primaryStyle}>
-                Education
-              </h2>
-              <div className="space-y-2">
-                {education.map((edu) => (
-                  <div key={edu.id} className="text-xs">
-                    <div className="flex justify-between font-bold text-gray-900">
-                      <span>{edu.degree} in {edu.fieldOfStudy}</span>
-                      <span>{edu.graduationDate}</span>
-                    </div>
-                    <div className="flex justify-between text-gray-600 italic">
-                      <span>{edu.institution}</span>
-                      {edu.location && <span>{edu.location}</span>}
-                    </div>
-                    {edu.details && <p className="text-gray-600 mt-0.5">{edu.details}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Projects */}
-          {hasProjects && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} uppercase tracking-wider border-b pb-0.5 mb-2`} style={primaryStyle}>
-                Key Projects
-              </h2>
-              <div className="space-y-3">
-                {projects.map((proj) => (
-                  <div key={proj.id} className="text-xs">
-                    <div className="flex justify-between font-bold text-gray-900">
-                      <span>
-                        {proj.title}
-                        {proj.link && (
-                          <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-gray-600">
-                            <ExternalLink size={10} />
-                          </a>
-                        )}
-                      </span>
-                      {proj.techStack && <span className="font-normal text-gray-500 italic">{proj.techStack}</span>}
-                    </div>
-                    <ul className="list-disc pl-4 text-gray-700 space-y-0.5 mt-1">
-                      {renderBulletPoints(proj.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Skills */}
-          {hasSkills && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} uppercase tracking-wider border-b pb-0.5 mb-2`} style={primaryStyle}>
-                Skills & Technical Expertise
-              </h2>
-              <div className="space-y-1 text-xs">
-                {skills.map((skill) => (
-                  <div key={skill.id} className="flex">
-                    <span className="font-bold text-gray-900 w-32 shrink-0">{skill.category}:</span>
-                    <span className="text-gray-700">{skill.items}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Certifications */}
-          {hasCertifications && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} uppercase tracking-wider border-b pb-0.5 mb-2`} style={primaryStyle}>
-                Certifications
-              </h2>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {certifications.map((cert) => (
-                  <div key={cert.id} className="flex justify-between text-gray-700">
-                    <div>
-                      <span className="font-semibold text-gray-900">{cert.name}</span>
-                      <span className="text-gray-500"> – {cert.issuer}</span>
-                    </div>
-                    <span className="text-gray-500 shrink-0">{cert.date}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // TEMPLATE 2: Sleek Modern (Clean, Accent Bars, Left Metadata)
-  const renderModernTemplate = () => {
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${spacingClass.padding} flex flex-col`}>
-        {/* Header Grid */}
-        <div className="flex justify-between items-start border-b-2 pb-4 mb-4" style={borderPrimaryStyle}>
-          <div>
-            <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} text-gray-900 tracking-tight leading-none`} style={primaryStyle}>
-              {personalInfo.firstName} {personalInfo.lastName}
-            </h1>
-            <p className="text-sm font-semibold tracking-wide mt-1.5" style={accentStyle}>
-              {personalInfo.title}
-            </p>
-          </div>
-
-          <div className="text-right text-xs text-gray-600 space-y-0.5">
-            {personalInfo.location && <div className="flex items-center justify-end gap-1"><MapPin size={11} style={accentStyle} /> {personalInfo.location}</div>}
-            {personalInfo.phone && <div className="flex items-center justify-end gap-1"><Phone size={11} style={accentStyle} /> {personalInfo.phone}</div>}
-            {personalInfo.email && <div className="flex items-center justify-end gap-1"><Mail size={11} style={accentStyle} /> {personalInfo.email}</div>}
-            
-            <div className="flex items-center justify-end gap-2 mt-1">
-              {personalInfo.website && (
-                <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                  <Globe size={11} /> Web
-                </a>
-              )}
-              {personalInfo.linkedin && (
-                <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                  <Linkedin size={11} /> LI
-                </a>
-              )}
-              {personalInfo.github && (
-                <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-0.5">
-                  <Github size={11} /> GH
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className={spacingClass.secGap}>
-          {/* Summary */}
-          {personalInfo.summary && (
-            <div className="print-section text-xs">
-              <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
-            </div>
-          )}
-
-          {/* Experience */}
-          {hasExperience && (
-            <div className="print-section">
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="w-1.5 h-5 rounded-sm shrink-0" style={bgPrimaryStyle} />
-                <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900`}>
-                  Professional Experience
-                </h2>
-              </div>
-              <div className="space-y-4">
-                {experience.map((exp) => (
-                  <div key={exp.id} className="text-xs">
-                    <div className="flex justify-between items-baseline">
-                      <h3 className="font-bold text-gray-900 text-sm">{exp.role}</h3>
-                      <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-sm bg-gray-100 text-gray-600">
-                        {exp.startDate} – {exp.endDate || "Present"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-semibold text-gray-600 mt-0.5 mb-1.5">
-                      <span>{exp.company}</span>
-                      {exp.location && <span className="text-gray-400">• {exp.location}</span>}
-                    </div>
-                    <ul className="text-gray-700 space-y-1">
-                      {renderBulletPoints(exp.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Education & Projects in Side-by-Side or Stacked */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-section">
-            {/* Education */}
-            {hasEducation && (
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="w-1.5 h-5 rounded-sm shrink-0" style={bgPrimaryStyle} />
-                  <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900`}>
-                    Education
-                  </h2>
-                </div>
-                <div className="space-y-2">
-                  {education.map((edu) => (
-                    <div key={edu.id} className="text-xs">
-                      <div className="font-bold text-gray-900">{edu.degree}</div>
-                      <div className="text-gray-600 font-medium">{edu.institution}</div>
-                      <div className="text-[10px] text-gray-500">{edu.graduationDate} {edu.location && `| ${edu.location}`}</div>
-                      {edu.details && <p className="text-gray-500 mt-1">{edu.details}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Certifications */}
-            {hasCertifications && (
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="w-1.5 h-5 rounded-sm shrink-0" style={bgPrimaryStyle} />
-                  <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900`}>
-                    Certifications
-                  </h2>
-                </div>
-                <div className="space-y-1 text-xs">
-                  {certifications.map((cert) => (
-                    <div key={cert.id}>
-                      <span className="font-bold text-gray-900">{cert.name}</span>
-                      <div className="text-[10px] text-gray-500">{cert.issuer} • {cert.date}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Projects */}
-          {hasProjects && (
-            <div className="print-section">
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="w-1.5 h-5 rounded-sm shrink-0" style={bgPrimaryStyle} />
-                <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900`}>
-                  Featured Projects
-                </h2>
-              </div>
-              <div className="space-y-3">
-                {projects.map((proj) => (
-                  <div key={proj.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>
-                        {proj.title}
-                        {proj.link && (
-                          <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-gray-600">
-                            <ExternalLink size={10} />
-                          </a>
-                        )}
-                      </span>
-                      {proj.techStack && <span className="text-[10px] font-normal text-gray-500 uppercase">{proj.techStack}</span>}
-                    </div>
-                    <ul className="text-gray-700 space-y-1 mt-1">
-                      {renderBulletPoints(proj.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Skills */}
-          {hasSkills && (
-            <div className="print-section">
-              <div className="flex items-center gap-3 mb-2.5">
-                <span className="w-1.5 h-5 rounded-sm shrink-0" style={bgPrimaryStyle} />
-                <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900`}>
-                  Skills Summary
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {skills.map((skill) => (
-                  <div key={skill.id} className="bg-gray-50 p-2 rounded border border-gray-100">
-                    <span className="font-bold text-gray-900 block mb-0.5">{skill.category}</span>
-                    <span className="text-gray-600 leading-tight">{skill.items}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // TEMPLATE 3: Minimalist Accent (Simple, sleek, no lines, margins/padding doing the work)
-  const renderMinimalTemplate = () => {
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${spacingClass.padding} flex flex-col`}>
-        {/* Top Info */}
-        <div className="mb-4">
-          <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight text-gray-900 leading-none`} style={primaryStyle}>
-            {personalInfo.firstName} {personalInfo.lastName}
-          </h1>
-          <p className="text-xs uppercase font-bold tracking-wider mt-1.5" style={accentStyle}>
+          <p className="text-gray-600 font-bold tracking-wider uppercase text-xs">
             {personalInfo.title}
           </p>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-3">
+          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[11px] text-gray-500 mt-2 font-medium">
             {personalInfo.location && <span>{personalInfo.location}</span>}
             {personalInfo.phone && <span>• {personalInfo.phone}</span>}
             {personalInfo.email && <span>• {personalInfo.email}</span>}
@@ -483,279 +357,185 @@ export default function ResumePreview({ data, isPrintView = false }) {
           </div>
         </div>
 
-        <div className={spacingClass.secGap}>
-          {personalInfo.summary && (
-            <div className="print-section text-xs">
-              <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
-            </div>
-          )}
-
-          {hasExperience && (
-            <div className="print-section">
-              <h2 className={`text-xs font-bold uppercase tracking-widest text-gray-400 mb-2`}>
-                Experience
-              </h2>
-              <div className="space-y-3">
-                {experience.map((exp) => (
-                  <div key={exp.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>{exp.role} <span className="font-normal text-gray-500">at {exp.company}</span></span>
-                      <span className="font-medium text-gray-500">{exp.startDate} – {exp.endDate || "Present"}</span>
-                    </div>
-                    {exp.location && <div className="text-gray-400 italic text-[11px]">{exp.location}</div>}
-                    <ul className="text-gray-700 space-y-0.5 mt-1">
-                      {renderBulletPoints(exp.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {hasEducation && (
-            <div className="print-section">
-              <h2 className={`text-xs font-bold uppercase tracking-widest text-gray-400 mb-2`}>
-                Education
-              </h2>
-              <div className="space-y-2">
-                {education.map((edu) => (
-                  <div key={edu.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>{edu.degree} in {edu.fieldOfStudy}</span>
-                      <span className="font-medium text-gray-500">{edu.graduationDate}</span>
-                    </div>
-                    <div className="text-gray-500">{edu.institution} {edu.location && `• ${edu.location}`}</div>
-                    {edu.details && <p className="text-gray-500 text-[11px] mt-0.5">{edu.details}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {hasProjects && (
-            <div className="print-section">
-              <h2 className={`text-xs font-bold uppercase tracking-widest text-gray-400 mb-2`}>
-                Projects
-              </h2>
-              <div className="space-y-3">
-                {projects.map((proj) => (
-                  <div key={proj.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>
-                        {proj.title}
-                        {proj.link && (
-                          <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-gray-600">
-                            <ExternalLink size={10} />
-                          </a>
-                        )}
-                      </span>
-                      {proj.techStack && <span className="font-normal text-gray-400 text-[11px]">{proj.techStack}</span>}
-                    </div>
-                    <ul className="text-gray-700 space-y-0.5 mt-1">
-                      {renderBulletPoints(proj.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {hasSkills && (
-            <div className="print-section">
-              <h2 className={`text-xs font-bold uppercase tracking-widest text-gray-400 mb-2`}>
-                Skills
-              </h2>
-              <div className="space-y-1 text-xs">
-                {skills.map((skill) => (
-                  <div key={skill.id} className="flex">
-                    <span className="font-semibold text-gray-900 w-36 shrink-0">{skill.category}</span>
-                    <span className="text-gray-700">{skill.items}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Dynamic section ordering loop */}
+        <div className="space-y-1">
+          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
         </div>
       </div>
     );
   };
 
-  // TEMPLATE 4: Creative Grid (Split 2-Column layout - highly visual, premium)
-  const renderCreativeTemplate = () => {
+  // TEMPLATE 2: Sleek Modern (Badge left, timeline nodes, styled pills)
+  const renderModern = () => {
     return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} flex flex-row min-h-full items-stretch`}>
-        {/* Left Column (Sidebar) */}
-        <div className="w-1/3 text-white p-6 flex flex-col" style={bgPrimaryStyle}>
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className={`${fontConfig.headingClass} text-xl tracking-tight leading-tight mb-1`}>
-              {personalInfo.firstName}<br/>{personalInfo.lastName}
+      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
+        {/* Header bar */}
+        <div className="flex justify-between items-center border-b-2 pb-4 mb-4" style={borderPrimaryStyle}>
+          <div className="flex items-center gap-3.5">
+            {renderInitialsBadge("w-14 h-14 text-sm")}
+            <div>
+              <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} text-gray-900 tracking-tight leading-none`} style={primaryStyle}>
+                {personalInfo.firstName} {personalInfo.lastName}
+              </h1>
+              <p className="text-xs font-bold tracking-wide mt-1" style={accentStyle}>
+                {personalInfo.title}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-right text-[10px] text-gray-500 space-y-0.5 font-medium">
+            {personalInfo.location && <div>{personalInfo.location}</div>}
+            {personalInfo.phone && <div>{personalInfo.phone}</div>}
+            {personalInfo.email && <div className="font-semibold" style={accentStyle}>{personalInfo.email}</div>}
+            
+            <div className="flex gap-2 justify-end mt-1 text-[9px] uppercase font-bold text-gray-400">
+              {personalInfo.website && <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline">Web</a>}
+              {personalInfo.linkedin && <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">LinkedIn</a>}
+              {personalInfo.github && <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline">GitHub</a>}
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic ordering loop */}
+        <div className="space-y-1">
+          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
+        </div>
+      </div>
+    );
+  };
+
+  // TEMPLATE 3: Minimalist Accent (Simple typography, timeline lines)
+  const renderMinimal = () => {
+    return (
+      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
+        <div className="mb-5 flex justify-between items-start">
+          <div>
+            <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight text-gray-900 leading-none`} style={primaryStyle}>
+              {personalInfo.firstName} {personalInfo.lastName}
             </h1>
-            <p className="text-[11px] opacity-80 uppercase tracking-widest font-semibold">
+            <p className="text-[10px] uppercase font-extrabold tracking-widest mt-1.5" style={accentStyle}>
               {personalInfo.title}
             </p>
           </div>
 
-          {/* Contact Details */}
-          <div className="mb-6 space-y-2.5 text-[11px]">
-            <h3 className="text-xs font-bold uppercase tracking-widest border-b border-white/20 pb-1 mb-2">
-              Contact
-            </h3>
-            {personalInfo.location && <div className="flex items-center gap-2"><MapPin size={11} className="opacity-80" /> <span>{personalInfo.location}</span></div>}
-            {personalInfo.phone && <div className="flex items-center gap-2"><Phone size={11} className="opacity-80" /> <span>{personalInfo.phone}</span></div>}
-            {personalInfo.email && <div className="flex items-center gap-2"><Mail size={11} className="opacity-80" /> <span className="break-all">{personalInfo.email}</span></div>}
-            {personalInfo.website && (
-              <div className="flex items-center gap-2">
-                <Globe size={11} className="opacity-80" />
-                <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline break-all">
-                  {personalInfo.website.replace(/^https?:\/\//, "")}
-                </a>
-              </div>
-            )}
-            {personalInfo.linkedin && (
-              <div className="flex items-center gap-2">
-                <Linkedin size={11} className="opacity-80" />
-                <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline break-all">
-                  {personalInfo.linkedin.replace(/^linkedin\.com\/in\//, "")}
-                </a>
-              </div>
-            )}
-            {personalInfo.github && (
-              <div className="flex items-center gap-2">
-                <Github size={11} className="opacity-80" />
-                <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline break-all">
-                  {personalInfo.github.replace(/^github\.com\//, "")}
-                </a>
-              </div>
-            )}
+          <div className="flex flex-col gap-0.5 items-end text-[10px] text-gray-500 font-semibold">
+            {personalInfo.email && <span>{personalInfo.email}</span>}
+            {personalInfo.phone && <span>{personalInfo.phone}</span>}
+            {personalInfo.location && <span>{personalInfo.location}</span>}
           </div>
-
-          {/* Skills */}
-          {hasSkills && (
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest border-b border-white/20 pb-1">
-                Expertise
-              </h3>
-              {skills.map((skill) => (
-                <div key={skill.id} className="text-[11px] space-y-0.5">
-                  <span className="font-semibold opacity-90 block">{skill.category}</span>
-                  <span className="opacity-75 leading-snug block">{skill.items}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Certifications (Sidebar Version) */}
-          {hasCertifications && (
-            <div className="mt-6 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-widest border-b border-white/20 pb-1">
-                Certifications
-              </h3>
-              {certifications.map((cert) => (
-                <div key={cert.id} className="text-[10px]">
-                  <span className="font-semibold block">{cert.name}</span>
-                  <span className="opacity-75 block">{cert.issuer} • {cert.date}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Right Column (Main Content) */}
-        <div className={`w-2/3 ${spacingClass.padding} flex flex-col ${spacingClass.secGap} bg-white text-gray-800`}>
-          {/* Summary */}
-          {personalInfo.summary && (
-            <div className="print-section text-xs">
-              <h2 className={`${fontConfig.headingClass} text-xs uppercase tracking-widest mb-1.5`} style={accentStyle}>
-                Profile
-              </h2>
-              <p className="text-gray-600 leading-relaxed text-justify">{personalInfo.summary}</p>
-            </div>
-          )}
-
-          {/* Experience */}
-          {hasExperience && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} text-xs uppercase tracking-widest mb-2`} style={accentStyle}>
-                Experience
-              </h2>
-              <div className="space-y-4">
-                {experience.map((exp) => (
-                  <div key={exp.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span className="text-[13px]">{exp.role}</span>
-                      <span className="font-medium text-gray-500 text-[10px]">{exp.startDate} – {exp.endDate || "Present"}</span>
-                    </div>
-                    <div className="text-gray-500 font-semibold mb-1">{exp.company} {exp.location && `| ${exp.location}`}</div>
-                    <ul className="text-gray-600 space-y-0.5">
-                      {renderBulletPoints(exp.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Projects */}
-          {hasProjects && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} text-xs uppercase tracking-widest mb-2`} style={accentStyle}>
-                Featured Projects
-              </h2>
-              <div className="space-y-3">
-                {projects.map((proj) => (
-                  <div key={proj.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>{proj.title}</span>
-                      {proj.techStack && <span className="font-normal text-gray-500 text-[10px] italic">{proj.techStack}</span>}
-                    </div>
-                    <ul className="text-gray-600 space-y-0.5 mt-0.5">
-                      {renderBulletPoints(proj.description)}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Education */}
-          {hasEducation && (
-            <div className="print-section">
-              <h2 className={`${fontConfig.headingClass} text-xs uppercase tracking-widest mb-2`} style={accentStyle}>
-                Education
-              </h2>
-              <div className="space-y-2">
-                {education.map((edu) => (
-                  <div key={edu.id} className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold text-gray-900">
-                      <span>{edu.degree}</span>
-                      <span className="font-medium text-gray-500 text-[10px]">{edu.graduationDate}</span>
-                    </div>
-                    <div className="text-gray-500">{edu.institution} {edu.location && `| ${edu.location}`}</div>
-                    {edu.details && <p className="text-gray-500 text-[11px] mt-0.5">{edu.details}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        {/* Dynamic ordering loop */}
+        <div className="space-y-1">
+          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
         </div>
       </div>
     );
   };
 
-  // Switch selector for template
+  // TEMPLATE 4: Creative Split Column (2-Column Grid with full sidebar)
+  const renderCreative = () => {
+    // Collect settings specifically for sidebar coloring
+    const sidebarStyle = {
+      backgroundColor: primaryColor,
+    };
+
+    return (
+      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} flex flex-row min-h-full items-stretch`}>
+        
+        {/* Left Column (Colored Sidebar) */}
+        <div className="w-1/3 text-white p-6 flex flex-col shrink-0" style={sidebarStyle}>
+          
+          {/* Sidebar Header Badge */}
+          <div className="flex flex-col items-center mb-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-extrabold text-white text-sm mb-3">
+              {personalInfo.firstName?.[0] || ""}{personalInfo.lastName?.[0] || ""}
+            </div>
+            <h1 className={`${fontConfig.headingClass} text-lg tracking-tight leading-tight`}>
+              {personalInfo.firstName}<br/>{personalInfo.lastName}
+            </h1>
+            <p className="text-[10px] opacity-80 uppercase tracking-widest font-semibold mt-1">
+              {personalInfo.title}
+            </p>
+          </div>
+
+          {/* Contact details */}
+          <div className="mb-6 space-y-2 text-[10px]">
+            <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1 mb-2">
+              Contact Details
+            </h3>
+            {personalInfo.location && <div>{personalInfo.location}</div>}
+            {personalInfo.phone && <div>{personalInfo.phone}</div>}
+            {personalInfo.email && <div className="break-all">{personalInfo.email}</div>}
+            {personalInfo.website && <div className="break-all opacity-80">{personalInfo.website.replace(/^https?:\/\//, "")}</div>}
+            {personalInfo.linkedin && <div className="break-all opacity-80">{personalInfo.linkedin.replace(/^linkedin\.com\/in\//, "")}</div>}
+            {personalInfo.github && <div className="break-all opacity-80">{personalInfo.github.replace(/^github\.com\//, "")}</div>}
+          </div>
+
+          {/* Skills (Rendered inside sidebar as visual light text list) */}
+          {hasSkills && (
+            <div className="space-y-3 text-[10px]">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1">
+                Expertise
+              </h3>
+              {skills.map((skill) => (
+                <div key={skill.id} className="space-y-1">
+                  <span className="font-bold opacity-90 block">{skill.category}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {skill.items.split(",").map((s, i) => (
+                      <span key={i} className="bg-white/10 border border-white/10 px-1.5 py-0.5 rounded text-[9px] font-medium block">
+                        {s.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Certifications (Sidebar layout) */}
+          {hasCertifications && (
+            <div className="mt-6 space-y-3 text-[10px]">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1">
+                Certifications
+              </h3>
+              {certifications.map((cert) => (
+                <div key={cert.id} className="space-y-0.5">
+                  <span className="font-semibold block leading-tight">{cert.name}</span>
+                  <span className="opacity-75 block text-[9px]">{cert.issuer} • {cert.date}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column (Main content in white background) */}
+        <div className={`w-2/3 ${paddingClass} flex flex-col bg-white text-gray-800`}>
+          {/* Render right-side sections by ordering (skipping skills/certifications if they exist in sidebar) */}
+          <div className="space-y-1">
+            {sectionOrder.map((sectionName) => {
+              if (sectionName === "skills" || sectionName === "certifications") return null;
+              return renderSectionByOrder(sectionName);
+            })}
+          </div>
+        </div>
+
+      </div>
+    );
+  };
+
   const selectTemplate = () => {
     switch (template) {
       case "classic":
-        return renderClassicTemplate();
+        return renderClassic();
       case "modern":
-        return renderModernTemplate();
+        return renderModern();
       case "minimal":
-        return renderMinimalTemplate();
+        return renderMinimal();
       case "creative":
-        return renderCreativeTemplate();
+        return renderCreative();
       default:
-        return renderModernTemplate();
+        return renderModern();
     }
   };
 

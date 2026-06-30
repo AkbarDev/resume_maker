@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   User, Briefcase, GraduationCap, Code, ShieldCheck, Settings, Plus, Trash2, 
-  ChevronDown, ChevronUp, Sparkles, ArrowUp, ArrowDown 
+  ChevronDown, ChevronUp, Sparkles, ArrowUp, ArrowDown, Move 
 } from "lucide-react";
 import { COLOR_PRESETS, FONTS } from "../types/resume";
 
@@ -62,6 +62,21 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
     });
   };
 
+  // Section Ordering hooks
+  const sectionOrder = data.layoutSettings?.sectionOrder || ["summary", "experience", "education", "projects", "skills", "certifications"];
+  
+  const handleMoveSection = (index, direction) => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === sectionOrder.length - 1) return;
+    
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const updatedOrder = [...sectionOrder];
+    const temp = updatedOrder[index];
+    updatedOrder[index] = updatedOrder[targetIndex];
+    updatedOrder[targetIndex] = temp;
+    handleLayoutChange("sectionOrder", updatedOrder);
+  };
+
   return (
     <div className="space-y-4 pr-1 text-gray-200">
       
@@ -90,7 +105,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.firstName || ""}
                   onChange={(e) => handlePersonalChange("firstName", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. John"
+                  placeholder="John"
                 />
               </div>
               <div>
@@ -100,7 +115,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.lastName || ""}
                   onChange={(e) => handlePersonalChange("lastName", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. Doe"
+                  placeholder="Doe"
                 />
               </div>
             </div>
@@ -112,7 +127,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                 value={data.personalInfo.title || ""}
                 onChange={(e) => handlePersonalChange("title", e.target.value)}
                 className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                placeholder="e.g. Senior Software Engineer"
+                placeholder="Senior Software Engineer"
               />
             </div>
 
@@ -124,7 +139,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.email || ""}
                   onChange={(e) => handlePersonalChange("email", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. john@example.com"
+                  placeholder="john@example.com"
                 />
               </div>
               <div>
@@ -134,7 +149,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.phone || ""}
                   onChange={(e) => handlePersonalChange("phone", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. +1 (555) 019-2834"
+                  placeholder="+1 (555) 019-2834"
                 />
               </div>
             </div>
@@ -147,7 +162,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.location || ""}
                   onChange={(e) => handlePersonalChange("location", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. New York, NY"
+                  placeholder="New York, NY"
                 />
               </div>
               <div>
@@ -157,7 +172,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.website || ""}
                   onChange={(e) => handlePersonalChange("website", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. https://johndoe.com"
+                  placeholder="https://johndoe.com"
                 />
               </div>
             </div>
@@ -170,7 +185,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.linkedin || ""}
                   onChange={(e) => handlePersonalChange("linkedin", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. linkedin.com/in/username"
+                  placeholder="linkedin.com/in/username"
                 />
               </div>
               <div>
@@ -180,7 +195,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                   value={data.personalInfo.github || ""}
                   onChange={(e) => handlePersonalChange("github", e.target.value)}
                   className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                  placeholder="e.g. github.com/username"
+                  placeholder="github.com/username"
                 />
               </div>
             </div>
@@ -201,7 +216,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                 onChange={(e) => handlePersonalChange("summary", e.target.value)}
                 rows={4}
                 className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none leading-relaxed"
-                placeholder="Briefly describe your career background, primary skillsets, and key professional ambitions..."
+                placeholder="Describe your career history, goals and core expertise..."
               />
             </div>
           </div>
@@ -232,7 +247,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     type="button"
                     onClick={() => moveItem("experience", idx, "up")}
                     disabled={idx === 0}
-                    className="p-1 text-gray-500 hover:text-white disabled:opacity-30 disabled:hover:text-gray-500"
+                    className="p-1 text-gray-500 hover:text-white disabled:opacity-30"
                   >
                     <ArrowUp size={14} />
                   </button>
@@ -240,7 +255,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     type="button"
                     onClick={() => moveItem("experience", idx, "down")}
                     disabled={idx === data.experience.length - 1}
-                    className="p-1 text-gray-500 hover:text-white disabled:opacity-30 disabled:hover:text-gray-500"
+                    className="p-1 text-gray-500 hover:text-white disabled:opacity-30"
                   >
                     <ArrowDown size={14} />
                   </button>
@@ -259,7 +274,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1">Company / Organization</label>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">Company</label>
                     <input
                       type="text"
                       value={exp.company}
@@ -288,7 +303,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       value={exp.location}
                       onChange={(e) => updateList("experience", idx, "location", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. London, UK"
+                      placeholder="e.g. San Francisco, CA"
                     />
                   </div>
                   <div>
@@ -298,7 +313,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       value={exp.startDate}
                       onChange={(e) => updateList("experience", idx, "startDate", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. 2021-08"
+                      placeholder="2021-08"
                     />
                   </div>
                   <div>
@@ -308,7 +323,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       value={exp.endDate}
                       onChange={(e) => updateList("experience", idx, "endDate", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. Present"
+                      placeholder="Present"
                     />
                   </div>
                 </div>
@@ -329,7 +344,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     onChange={(e) => updateList("experience", idx, "description", e.target.value)}
                     rows={4}
                     className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono resize-none leading-relaxed"
-                    placeholder="• Built X utilizing Y to achieve Z&#10;• Orchestrated software migration..."
+                    placeholder="• Built features to optimize performance..."
                   />
                 </div>
               </div>
@@ -338,7 +353,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <button
               type="button"
               onClick={() => addItem("experience", { company: "", role: "", location: "", startDate: "", endDate: "", description: "" })}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-colors"
             >
               <Plus size={16} /> Add Work Experience
             </button>
@@ -379,7 +394,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1">Institution / School</label>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">Institution</label>
                     <input
                       type="text"
                       value={edu.institution}
@@ -434,13 +449,13 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Additional Details (GPA, Honors, etc.)</label>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Details (GPA, coursework)</label>
                   <input
                     type="text"
                     value={edu.details}
                     onChange={(e) => updateList("education", idx, "details", e.target.value)}
                     className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                    placeholder="GPA 3.8/4.0. Thesis on NLP models..."
+                    placeholder="GPA 3.8/4.0."
                   />
                 </div>
               </div>
@@ -449,7 +464,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <button
               type="button"
               onClick={() => addItem("education", { institution: "", degree: "", fieldOfStudy: "", location: "", graduationDate: "", details: "" })}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-colors"
             >
               <Plus size={16} /> Add Education
             </button>
@@ -500,19 +515,19 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1">Technologies Used (Comma list)</label>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">Technologies (Comma list)</label>
                     <input
                       type="text"
                       value={proj.techStack}
                       onChange={(e) => updateList("projects", idx, "techStack", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. React, Node.js, Tailwind"
+                      placeholder="e.g. React, Node.js"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1">Project Link (Optional)</label>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">Project Link</label>
                   <input
                     type="text"
                     value={proj.link}
@@ -524,13 +539,13 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-semibold text-gray-400">Details / Achievements</label>
+                    <label className="block text-xs font-semibold text-gray-400">Details</label>
                     <button
                       type="button"
-                      onClick={() => onAIEnhance({ type: "project", text: proj.description, context: `Project name: ${proj.title}` })}
+                      onClick={() => onAIEnhance({ type: "project", text: proj.description, context: `Project: ${proj.title}` })}
                       className="flex items-center gap-1 text-[11px] font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full transition-colors"
                     >
-                      <Sparkles size={10} /> AI Refine Bullet
+                      <Sparkles size={10} /> AI Refine
                     </button>
                   </div>
                   <textarea
@@ -538,7 +553,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     onChange={(e) => updateList("projects", idx, "description", e.target.value)}
                     rows={3}
                     className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono resize-none leading-relaxed"
-                    placeholder="• Built X utilizing Y to achieve Z"
+                    placeholder="• Built web portals utilizing React..."
                   />
                 </div>
               </div>
@@ -547,7 +562,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <button
               type="button"
               onClick={() => addItem("projects", { title: "", techStack: "", link: "", description: "" })}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-3 rounded-xl text-sm font-semibold transition-colors"
             >
               <Plus size={16} /> Add Project
             </button>
@@ -580,14 +595,14 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     value={skill.category}
                     onChange={(e) => updateList("skills", idx, "category", e.target.value)}
                     className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                    placeholder="Category (e.g. Programming Languages)"
+                    placeholder="Category (e.g. Frontend Frameworks)"
                   />
                   <input
                     type="text"
                     value={skill.items}
                     onChange={(e) => updateList("skills", idx, "items", e.target.value)}
                     className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                    placeholder="Skills separated by commas (e.g. JavaScript, Python, C++)"
+                    placeholder="Skills separated by commas (e.g. React, Vue, Angular)"
                   />
                 </div>
                 <button
@@ -603,7 +618,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <button
               type="button"
               onClick={() => addItem("skills", { category: "", items: "" })}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-2 rounded-xl text-sm font-semibold transition-colors"
             >
               <Plus size={16} /> Add Skill Group
             </button>
@@ -669,17 +684,17 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       value={cert.date}
                       onChange={(e) => updateList("certifications", idx, "date", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. 2024-01"
+                      placeholder="2024-01"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1">Credential URL (Optional)</label>
+                    <label className="block text-xs font-semibold text-gray-400 mb-1">Credential Link</label>
                     <input
                       type="text"
                       value={cert.link || ""}
                       onChange={(e) => updateList("certifications", idx, "link", e.target.value)}
                       className="w-full bg-slate-900/60 border border-dark-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      placeholder="e.g. credential-link.com"
+                      placeholder="credential-link.com"
                     />
                   </div>
                 </div>
@@ -689,7 +704,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <button
               type="button"
               onClick={() => addItem("certifications", { name: "", issuer: "", date: "", link: "" })}
-              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 border border-dashed border-dark-border hover:border-indigo-500 hover:bg-indigo-500/5 py-2 rounded-xl text-sm font-semibold transition-colors"
             >
               <Plus size={16} /> Add Certification
             </button>
@@ -697,7 +712,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
         )}
       </div>
 
-      {/* SECTION 7: Layout & Design Settings */}
+      {/* SECTION 7: Upgraded Customization Toolbar */}
       <div className="border border-dark-border rounded-xl bg-dark-card overflow-hidden transition-all duration-200">
         <button
           onClick={() => toggleSection("layoutSettings")}
@@ -707,29 +722,29 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
               <Settings size={18} />
             </div>
-            <span>Design & Customization</span>
+            <span>Custom Formatting Toolbar</span>
           </div>
           {activeSection === "layoutSettings" ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
 
         {activeSection === "layoutSettings" && (
-          <div className="p-5 space-y-4">
+          <div className="p-5 space-y-5">
             
             {/* Template Selector */}
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-2">Resume Style Template</label>
+              <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Resume Design Theme</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: "classic", name: "Harvard Classic", desc: "Traditional, centered, ATS standard" },
-                  { id: "modern", name: "Sleek Modern", desc: "Structured sections, accent lines" },
-                  { id: "minimal", name: "Minimal Accent", desc: "Understated hierarchy, generous space" },
-                  { id: "creative", name: "Creative Grid", desc: "Sidebar details, high impact" }
+                  { id: "classic", name: "Harvard Classic", desc: "Centered, traditional serif" },
+                  { id: "modern", name: "Sleek Modern", desc: "Connect-the-dots timelines" },
+                  { id: "minimal", name: "Minimal Accent", desc: "Whitespace & bold headers" },
+                  { id: "creative", name: "Creative Grid", desc: "Left sidebar details card" }
                 ].map((tpl) => (
                   <button
                     key={tpl.id}
                     type="button"
                     onClick={() => handleLayoutChange("template", tpl.id)}
-                    className={`flex flex-col text-left p-3 rounded-lg border text-sm transition-all ${
+                    className={`flex flex-col text-left p-3 rounded-lg border text-sm transition-all cursor-pointer ${
                       data.layoutSettings.template === tpl.id
                         ? "border-indigo-500 bg-indigo-500/5"
                         : "border-dark-border bg-slate-900/30 hover:border-gray-500"
@@ -742,14 +757,88 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
               </div>
             </div>
 
-            {/* Typography */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Spacing / Margin / Line Height Sliders */}
+            <div className="space-y-3.5 border-t border-dark-border/40 pt-4">
+              <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Layout Spacing Sliders</h4>
+              
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5">Font Style</label>
+                <div className="flex justify-between items-center text-xs text-gray-400 mb-1.5">
+                  <span>Page Spacing (Paddings)</span>
+                  <span className="text-[10px] font-mono text-gray-300 uppercase">{data.layoutSettings.spacing}</span>
+                </div>
+                <div className="flex gap-2">
+                  {["compact", "normal", "loose"].map((sz) => (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => handleLayoutChange("spacing", sz)}
+                      className={`flex-1 py-1 rounded border text-[10px] capitalize font-bold transition-all cursor-pointer ${
+                        data.layoutSettings.spacing === sz 
+                          ? "bg-indigo-600 border-indigo-500 text-white" 
+                          : "border-dark-border bg-slate-900/30 text-gray-400"
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center text-xs text-gray-400 mb-1.5">
+                  <span>Section Margins</span>
+                  <span className="text-[10px] font-mono text-gray-300 uppercase">{data.layoutSettings.marginSize || "normal"}</span>
+                </div>
+                <div className="flex gap-2">
+                  {["compact", "normal", "loose"].map((sz) => (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => handleLayoutChange("marginSize", sz)}
+                      className={`flex-1 py-1 rounded border text-[10px] capitalize font-bold transition-all cursor-pointer ${
+                        (data.layoutSettings.marginSize || "normal") === sz 
+                          ? "bg-indigo-600 border-indigo-500 text-white" 
+                          : "border-dark-border bg-slate-900/30 text-gray-400"
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center text-xs text-gray-400 mb-1.5">
+                  <span>Text Line Height</span>
+                  <span className="text-[10px] font-mono text-gray-300 uppercase">{data.layoutSettings.lineHeight || "normal"}</span>
+                </div>
+                <div className="flex gap-2">
+                  {["tight", "normal", "relaxed"].map((lh) => (
+                    <button
+                      key={lh}
+                      type="button"
+                      onClick={() => handleLayoutChange("lineHeight", lh)}
+                      className={`flex-1 py-1 rounded border text-[10px] capitalize font-bold transition-all cursor-pointer ${
+                        (data.layoutSettings.lineHeight || "normal") === lh 
+                          ? "bg-indigo-600 border-indigo-500 text-white" 
+                          : "border-dark-border bg-slate-900/30 text-gray-400"
+                      }`}
+                    >
+                      {lh}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Typography / Font Style */}
+            <div className="grid grid-cols-2 gap-4 border-t border-dark-border/40 pt-4">
+              <div>
+                <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1.5">Font Style</label>
                 <select
                   value={data.layoutSettings.fontFamily}
                   onChange={(e) => handleLayoutChange("fontFamily", e.target.value)}
-                  className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full bg-slate-900 border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
                 >
                   {Object.entries(FONTS).map(([key, cfg]) => (
                     <option key={key} value={key} className="bg-slate-900">{cfg.label}</option>
@@ -757,26 +846,11 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5">Overall Spacing</label>
-                <select
-                  value={data.layoutSettings.spacing}
-                  onChange={(e) => handleLayoutChange("spacing", e.target.value)}
-                  className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                >
-                  <option value="compact" className="bg-slate-900">Compact Padding</option>
-                  <option value="normal" className="bg-slate-900">Standard Padding</option>
-                  <option value="loose" className="bg-slate-900">Comfortable Spacing</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-400 mb-1.5">Base Font Size</label>
+                <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1.5">Base Font Size</label>
                 <select
                   value={data.layoutSettings.fontSize}
                   onChange={(e) => handleLayoutChange("fontSize", e.target.value)}
-                  className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  className="w-full bg-slate-900 border border-dark-border rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
                 >
                   <option value="xs" className="bg-slate-900">Extra Small (11px)</option>
                   <option value="sm" className="bg-slate-900">Small (12px)</option>
@@ -786,10 +860,11 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
               </div>
             </div>
 
-            {/* Colors */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5">Theme Accent Color</label>
-              <div className="flex flex-wrap gap-2 mb-3">
+            {/* Colors Dashboard */}
+            <div className="border-t border-dark-border/40 pt-4">
+              <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Colors Dashboard</label>
+              
+              <div className="flex flex-wrap gap-1.5 mb-3">
                 {COLOR_PRESETS.map((preset) => (
                   <button
                     key={preset.name}
@@ -798,54 +873,87 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       handleLayoutChange("primaryColor", preset.primary);
                       handleLayoutChange("accentColor", preset.accent);
                     }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                    className={`flex items-center gap-1 px-2 py-1 rounded border text-[10px] font-semibold transition-all cursor-pointer ${
                       data.layoutSettings.primaryColor === preset.primary
                         ? "border-indigo-500 bg-indigo-500/10 text-white"
-                        : "border-dark-border bg-slate-900/30 hover:border-gray-500 text-gray-300"
+                        : "border-dark-border bg-slate-900/30 text-gray-400 hover:border-gray-500"
                     }`}
                   >
-                    <span className="w-3.5 h-3.5 rounded-full border border-white/20" style={{ backgroundColor: preset.primary }} />
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: preset.primary }} />
                     {preset.name}
                   </button>
                 ))}
               </div>
 
-              {/* Custom Colors Inputs */}
-              <div className="grid grid-cols-2 gap-4 mt-2 bg-slate-900/30 p-3 rounded-lg border border-dark-border/40">
+              <div className="grid grid-cols-2 gap-3 bg-slate-900/30 p-2.5 rounded-lg border border-dark-border/40 text-[10px] font-semibold">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Primary Color</label>
-                  <div className="flex items-center gap-2">
+                  <span className="text-gray-400 block mb-1 uppercase">Primary Theme</span>
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="color"
                       value={data.layoutSettings.primaryColor}
                       onChange={(e) => handleLayoutChange("primaryColor", e.target.value)}
-                      className="w-8 h-8 rounded border border-dark-border cursor-pointer bg-transparent"
+                      className="w-6 h-6 rounded border border-dark-border cursor-pointer bg-transparent"
                     />
-                    <input
-                      type="text"
-                      value={data.layoutSettings.primaryColor}
-                      onChange={(e) => handleLayoutChange("primaryColor", e.target.value)}
-                      className="bg-transparent border-0 text-xs font-mono text-white focus:outline-none w-20"
-                    />
+                    <span className="font-mono text-white text-[10px]">{data.layoutSettings.primaryColor}</span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Secondary / Date Accent</label>
-                  <div className="flex items-center gap-2">
+                  <span className="text-gray-400 block mb-1 uppercase">Accent & Dates</span>
+                  <div className="flex items-center gap-1.5">
                     <input
                       type="color"
                       value={data.layoutSettings.accentColor}
                       onChange={(e) => handleLayoutChange("accentColor", e.target.value)}
-                      className="w-8 h-8 rounded border border-dark-border cursor-pointer bg-transparent"
+                      className="w-6 h-6 rounded border border-dark-border cursor-pointer bg-transparent"
                     />
-                    <input
-                      type="text"
-                      value={data.layoutSettings.accentColor}
-                      onChange={(e) => handleLayoutChange("accentColor", e.target.value)}
-                      className="bg-transparent border-0 text-xs font-mono text-white focus:outline-none w-20"
-                    />
+                    <span className="font-mono text-white text-[10px]">{data.layoutSettings.accentColor}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Section Reordering panel */}
+            <div className="border-t border-dark-border/40 pt-4 space-y-2">
+              <label className="block text-xs font-bold text-indigo-400 uppercase tracking-wider">Section Ordering</label>
+              
+              <div className="space-y-1.5 bg-slate-900/30 p-3 rounded-lg border border-dark-border/40">
+                {sectionOrder.map((section, idx) => {
+                  const label = {
+                    summary: "Summary Profile",
+                    experience: "Work Experience",
+                    education: "Education History",
+                    projects: "Featured Projects",
+                    skills: "Skills & Expertise",
+                    certifications: "Certifications"
+                  }[section];
+                  
+                  return (
+                    <div key={section} className="flex justify-between items-center text-xs bg-slate-950/20 px-2.5 py-1.5 border border-dark-border/20 rounded">
+                      <span className="font-medium text-gray-300 capitalize">{label}</span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSection(idx, "up")}
+                          disabled={idx === 0}
+                          className="p-1 hover:bg-slate-800 text-gray-500 hover:text-white disabled:opacity-30 cursor-pointer"
+                          title="Move up"
+                        >
+                          <ArrowUp size={11} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSection(idx, "down")}
+                          disabled={idx === sectionOrder.length - 1}
+                          className="p-1 hover:bg-slate-800 text-gray-500 hover:text-white disabled:opacity-30 cursor-pointer"
+                          title="Move down"
+                        >
+                          <ArrowDown size={11} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             
