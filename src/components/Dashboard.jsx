@@ -1,15 +1,20 @@
 import React, { useState, useRef } from "react";
 import { 
   FileText, Plus, Upload, Brain, LogOut, Trash2, Edit2, Calendar, Layout, 
-  ArrowRight, RefreshCw, X, ChevronRight, Download, Sparkles 
+  ArrowRight, RefreshCw, X, ChevronRight, Download, Sparkles, Search, Sliders 
 } from "lucide-react";
 import { INITIAL_RESUME_DATA } from "../types/resume";
+import { CURATED_TEMPLATES } from "../types/templates";
 
 export default function Dashboard({ username, resumes, onCreateNew, onSelect, onDelete, onRename, onImportJson, onLogout }) {
   const [isParsingText, setIsParsingText] = useState(false);
   const [rawResumeText, setRawResumeText] = useState("");
   const [parserError, setParserError] = useState("");
   const [isParserOpen, setIsParserOpen] = useState(false);
+
+  // Templates Gallery Search and Filters
+  const [templateSearch, setTemplateSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
   
   const fileInputRef = useRef(null);
 
@@ -22,7 +27,6 @@ export default function Dashboard({ username, resumes, onCreateNew, onSelect, on
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        // Basic schema checks
         if (parsed.personalInfo && parsed.layoutSettings) {
           onImportJson(parsed);
           e.target.value = null; // Reset
@@ -36,7 +40,7 @@ export default function Dashboard({ username, resumes, onCreateNew, onSelect, on
     reader.readAsText(file);
   };
 
-  // Hugging Face AI Unstructured Text Resume Parser
+  // AI Unstructured Text Resume Parser
   const handleAIParse = async () => {
     setParserError("");
     setIsParsingText(true);
@@ -46,7 +50,7 @@ export default function Dashboard({ username, resumes, onCreateNew, onSelect, on
   "personalInfo": {
     "firstName": "string",
     "lastName": "string",
-    "title": "string (e.g. Software Engineer)",
+    "title": "string",
     "email": "string",
     "phone": "string",
     "location": "string",
@@ -62,7 +66,7 @@ export default function Dashboard({ username, resumes, onCreateNew, onSelect, on
       "location": "string",
       "startDate": "string (YYYY-MM)",
       "endDate": "string (YYYY-MM or Present)",
-      "description": "string (bullet points separated by newlines)"
+      "description": "string"
     }
   ],
   "education": [
@@ -85,8 +89,8 @@ export default function Dashboard({ username, resumes, onCreateNew, onSelect, on
   ],
   "skills": [
     {
-      "category": "string (e.g. Languages)",
-      "items": "string (comma separated list)"
+      "category": "string",
+      "items": "string"
     }
   ],
   "certifications": [
@@ -105,13 +109,12 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
     const isDemo = localStorage.getItem("hf_is_demo") !== "false";
 
     if (isDemo || !token) {
-      // Demo Mode Regex Parsing + Pre-populated structure
+      // Mock parsing for Demo Mode
       setTimeout(() => {
         try {
           const emailMatch = rawResumeText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
           const phoneMatch = rawResumeText.match(/\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/);
           
-          // Try to guess name from first line
           const lines = rawResumeText.split("\n").map(l => l.trim()).filter(l => l !== "");
           const nameLine = lines[0] || "Jane Applicant";
           const nameParts = nameLine.split(/\s+/);
@@ -129,7 +132,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
               website: "https://janedoe.dev",
               linkedin: "linkedin.com/in/janedoe",
               github: "github.com/janedoe",
-              summary: "A motivated technology professional with experience building robust client-side software systems. Experienced in collaborating within cross-functional environments to implement modern features."
+              summary: "A motivated technology professional with experience building robust client-side software systems."
             },
             experience: [
               {
@@ -139,7 +142,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                 location: "New York, NY",
                 startDate: "2023-01",
                 endDate: "Present",
-                description: "• Engineered web applications utilizing React and state management strategies.\n• Optimized CSS modules raising performance ratings by 20%.\n• Designed scalable RESTful controllers."
+                description: "• Engineered web applications utilizing React and state management strategies.\n• Optimized CSS modules raising performance ratings by 20%."
               }
             ],
             education: [
@@ -150,21 +153,12 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                 fieldOfStudy: "Computer Science",
                 location: "New York, NY",
                 graduationDate: "2022-12",
-                details: "Honors Graduate. Focus on Software Engineering systems."
+                details: "Honors Graduate."
               }
             ],
-            projects: [
-              {
-                id: "proj-1",
-                title: "Portfolio website",
-                techStack: "React, Tailwind",
-                link: "",
-                description: "• Built responsive developer portfolios showcasing dynamic project cards."
-              }
-            ],
+            projects: [],
             skills: [
-              { id: "skill-1", category: "Languages & Frameworks", items: "JavaScript, React, CSS, HTML" },
-              { id: "skill-2", category: "Tools", items: "Git, npm, VS Code" }
+              { id: "skill-1", category: "Languages & Frameworks", items: "JavaScript, React, CSS, HTML" }
             ],
             certifications: [],
             layoutSettings: {
@@ -189,7 +183,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
       return;
     }
 
-    // Live HF Router Call
     try {
       const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
         method: "POST",
@@ -216,7 +209,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
       const jsonEnd = reply.lastIndexOf("}") + 1;
       const parsed = JSON.parse(reply.substring(jsonStart, jsonEnd));
       
-      // Inject unique IDs
       const enrichId = (list, prefix) => 
         (list || []).map((item, i) => ({ ...item, id: `${prefix}-${Date.now()}-${i}` }));
 
@@ -241,7 +233,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
       setIsParserOpen(false);
       setRawResumeText("");
     } catch (err) {
-      setParserError(`Failed to parse: ${err.message}. Ensure valid API credentials, or toggle Demo Mode in header settings.`);
+      setParserError(`Failed to parse: ${err.message}. Ensure valid API credentials, or toggle Demo Mode.`);
     } finally {
       setIsParsingText(false);
     }
@@ -258,10 +250,18 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
     URL.revokeObjectURL(url);
   };
 
+  // Filter templates list
+  const filteredTemplates = CURATED_TEMPLATES.filter(tpl => {
+    const matchesSearch = tpl.name.toLowerCase().includes(templateSearch.toLowerCase()) || 
+                          tpl.description.toLowerCase().includes(templateSearch.toLowerCase());
+    const matchesCategory = activeCategory === "All" || tpl.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col font-inter">
-      {/* Glow Effects */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
+      {/* Background radial highlight */}
+      <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
 
       {/* Top Navbar */}
       <header className="border-b border-dark-border bg-dark-card/90 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-30">
@@ -301,27 +301,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
           </div>
 
           <div className="flex flex-wrap gap-3 relative z-10">
-            
-            <button
-              onClick={() => onCreateNew(INITIAL_RESUME_DATA, "Sample Template Resume")}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/10 transition-colors"
-            >
-              <Plus size={15} />
-              <span>Use Sample Template</span>
-            </button>
-
-            <button
-              onClick={() => onCreateNew({
-                personalInfo: { firstName: "", lastName: "", title: "", email: "", phone: "", location: "", website: "", linkedin: "", github: "", summary: "" },
-                experience: [], education: [], projects: [], skills: [], certifications: [],
-                layoutSettings: { template: "modern", primaryColor: "#0f172a", accentColor: "#2563eb", fontSize: "sm", spacing: "normal", fontFamily: "sans" }
-              }, "My New Resume")}
-              className="border border-dark-border hover:border-gray-500 bg-slate-900/40 text-gray-300 hover:text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
-            >
-              <Plus size={15} />
-              <span>Blank Slate</span>
-            </button>
-
             <button
               onClick={() => fileInputRef.current.click()}
               className="border border-dark-border hover:border-gray-500 bg-slate-900/40 text-gray-300 hover:text-white font-semibold text-xs py-2.5 px-4 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
@@ -344,7 +323,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
               <Brain size={14} />
               <span>AI Resume Parser</span>
             </button>
-
           </div>
         </div>
 
@@ -352,8 +330,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
         {isParserOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="w-full max-w-2xl bg-dark-card border border-dark-border rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-              
-              {/* Modal Header */}
               <div className="p-4 border-b border-dark-border bg-slate-900/60 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-indigo-400">
                   <Brain size={18} />
@@ -364,10 +340,9 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                 </button>
               </div>
 
-              {/* Modal Body */}
               <div className="p-5 space-y-4">
                 <p className="text-xs text-gray-400">
-                  Paste the text copy of your existing resume/CV below. Our LLM will scan it to extract structural details (contact fields, jobs list, education, projects, skills) and load it into a customizable layout.
+                  Paste the text copy of your existing resume/CV below. Our LLM will scan it to extract structural details and load them into a customizable layout.
                 </p>
 
                 {parserError && (
@@ -381,11 +356,10 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                   onChange={(e) => setRawResumeText(e.target.value)}
                   rows={10}
                   className="w-full bg-slate-900 border border-dark-border rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500 resize-none font-mono leading-relaxed"
-                  placeholder="Paste raw text here... e.g. John Doe, London, UK. Work Experience: Lead Engineer at InnovateTech 2021 - Present..."
+                  placeholder="Paste raw text here..."
                 />
               </div>
 
-              {/* Modal Footer */}
               <div className="p-4 border-t border-dark-border bg-slate-900/40 flex justify-end gap-3">
                 <button
                   onClick={() => setIsParserOpen(false)}
@@ -409,20 +383,19 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                   )}
                 </button>
               </div>
-
             </div>
           </div>
         )}
 
-        {/* Resumes Grid */}
+        {/* SECTION 1: Resumes List */}
         <div className="space-y-4">
           <h3 className="font-outfit font-bold text-base text-white">Your Resumes ({resumes.length})</h3>
           
           {resumes.length === 0 ? (
-            <div className="text-center py-16 bg-dark-card/30 border border-dashed border-dark-border rounded-2xl">
+            <div className="text-center py-10 bg-dark-card/30 border border-dashed border-dark-border rounded-2xl">
               <FileText className="text-gray-600 mx-auto mb-3" size={32} />
               <p className="text-sm font-semibold text-gray-400">No resumes found</p>
-              <p className="text-xs text-gray-500 mt-1">Create your first resume using the creator buttons above.</p>
+              <p className="text-xs text-gray-500 mt-1">Select a design template from the library below to start editing!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -431,7 +404,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                   key={resume.id}
                   className="bg-dark-card border border-dark-border rounded-2xl p-5 hover:border-indigo-500/50 shadow-lg hover:shadow-indigo-600/5 transition-all flex flex-col group"
                 >
-                  {/* Card Header */}
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-semibold text-sm text-white group-hover:text-indigo-400 transition-colors truncate w-4/5">
@@ -443,14 +415,12 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                             const newName = prompt("Rename Resume file:", resume.title);
                             if (newName && newName.trim()) onRename(resume.id, newName.trim());
                           }}
-                          title="Rename file"
                           className="p-1 hover:bg-slate-800 text-gray-400 hover:text-white rounded"
                         >
                           <Edit2 size={12} />
                         </button>
                         <button
                           onClick={() => handleExportBackup(resume)}
-                          title="Export backup (.json)"
                           className="p-1 hover:bg-slate-800 text-gray-400 hover:text-white rounded"
                         >
                           <Download size={12} />
@@ -461,7 +431,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                               onDelete(resume.id);
                             }
                           }}
-                          title="Delete resume"
                           className="p-1 hover:bg-slate-800 text-red-500 hover:text-red-400 rounded"
                         >
                           <Trash2 size={12} />
@@ -481,7 +450,6 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                     </div>
                   </div>
 
-                  {/* Edit Link */}
                   <button
                     onClick={() => onSelect(resume)}
                     className="w-full flex items-center justify-between border border-dark-border group-hover:border-indigo-500/40 bg-slate-900/30 group-hover:bg-indigo-600/10 p-2.5 rounded-xl text-xs font-semibold text-gray-300 group-hover:text-indigo-400 transition-all cursor-pointer mt-4"
@@ -493,6 +461,111 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
               ))}
             </div>
           )}
+        </div>
+
+        {/* SECTION 2: Curated Templates Gallery */}
+        <div className="space-y-6 pt-4 border-t border-dark-border/60">
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-outfit font-extrabold text-lg text-white flex items-center gap-2">
+                <Layout size={20} className="text-indigo-400" /> Curated Templates Library
+              </h3>
+              <p className="text-xs text-gray-400 mt-0.5">Explore 50+ pre-made templates optimized for applicant screening filters.</p>
+            </div>
+
+            {/* Template Search */}
+            <div className="relative w-full md:w-80">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 pointer-events-none">
+                <Search size={14} />
+              </span>
+              <input
+                type="text"
+                value={templateSearch}
+                onChange={(e) => setTemplateSearch(e.target.value)}
+                placeholder="Search 50 premium presets..."
+                className="w-full bg-slate-900 border border-dark-border rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2 text-xs border-b border-dark-border pb-3">
+            {["All", "Tech", "Professional", "Creative", "Academic"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-3 py-1.5 rounded-full font-semibold border transition-all cursor-pointer ${
+                  activeCategory === cat
+                    ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/10"
+                    : "border-dark-border bg-slate-900/30 text-gray-400 hover:text-white"
+                }`}
+              >
+                {cat === "All" ? `All Styles (50)` : cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Templates Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredTemplates.map((tpl) => (
+              <div 
+                key={tpl.id}
+                className="bg-dark-card/40 border border-dark-border hover:border-slate-700 p-5 rounded-2xl flex flex-col justify-between transition-all"
+              >
+                <div>
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-slate-800 text-indigo-400 border border-dark-border">
+                      {tpl.category}
+                    </span>
+                    
+                    {/* Color Presets indicators */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: tpl.settings.primaryColor }} title="Primary Theme" />
+                      <span className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: tpl.settings.accentColor }} title="Accent Color" />
+                    </div>
+                  </div>
+
+                  <h4 className="font-semibold text-sm text-white">{tpl.name}</h4>
+                  <p className="text-[11px] text-gray-500 mt-1.5 leading-relaxed">{tpl.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-5">
+                  <button
+                    onClick={() => onCreateNew({
+                      personalInfo: { ...INITIAL_RESUME_DATA.personalInfo, title: tpl.name.replace("CV", "").replace("Portfolio", "") },
+                      experience: INITIAL_RESUME_DATA.experience,
+                      education: INITIAL_RESUME_DATA.education,
+                      projects: INITIAL_RESUME_DATA.projects,
+                      skills: INITIAL_RESUME_DATA.skills,
+                      certifications: INITIAL_RESUME_DATA.certifications,
+                      layoutSettings: tpl.settings
+                    }, `${tpl.name} Draft`)}
+                    className="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white font-bold text-[10px] py-2 px-3 rounded-lg border border-indigo-500/20 text-center cursor-pointer transition-all"
+                  >
+                    Use Sample Data
+                  </button>
+                  <button
+                    onClick={() => onCreateNew({
+                      personalInfo: { firstName: "", lastName: "", title: "", email: "", phone: "", location: "", website: "", linkedin: "", github: "", summary: "" },
+                      experience: [], education: [], projects: [], skills: [], certifications: [],
+                      layoutSettings: tpl.settings
+                    }, `My ${tpl.name}`)}
+                    className="border border-dark-border hover:border-gray-500 bg-slate-900/40 text-gray-300 hover:text-white font-semibold text-[10px] py-2 px-3 rounded-lg text-center cursor-pointer transition-all"
+                  >
+                    Start Blank
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {filteredTemplates.length === 0 && (
+              <div className="col-span-full text-center py-10 bg-slate-900/20 border border-dark-border rounded-xl">
+                <p className="text-xs text-gray-500">No templates matching "{templateSearch}" found in this category.</p>
+              </div>
+            )}
+          </div>
+
         </div>
 
       </main>
