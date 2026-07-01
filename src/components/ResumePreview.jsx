@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Globe, ExternalLink, Plus, Trash2, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
+import { Mail, Phone, MapPin, Globe, ExternalLink, Plus, Trash2, ArrowUp, ArrowDown, Sparkles, Calendar, Settings } from "lucide-react";
 import { FONTS, SIZES } from "../types/resume";
 
 // Simple Inline-Editable Component
@@ -127,6 +127,8 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     layoutSettings = {} 
   } = data;
 
+  const [focusedItemId, setFocusedItemId] = useState(null);
+
   const { 
     template = "modern", 
     primaryColor = "#0f172a", 
@@ -143,6 +145,87 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     leftColumnSections = ["summary", "experience", "education", "projects"],
     rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
   } = layoutSettings;
+
+  // Helper to wrap items with click-to-edit box, green outline, and floating toolbar controls
+  const EditorItemBox = ({ id, type, index, itemsArray = [], onAdd, onDelete, children }) => {
+    if (isPrintView) return children;
+    const isFocused = focusedItemId === id;
+    
+    return (
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          setFocusedItemId(id);
+        }}
+        className={`relative transition-all duration-200 cursor-pointer ${
+          isFocused 
+            ? "border-2 border-emerald-400 rounded-xl p-4 m-0.5 bg-emerald-500/[0.03] shadow-md dark:bg-emerald-500/[0.02]" 
+            : "border-2 border-transparent hover:bg-slate-100/50 dark:hover:bg-slate-800/30 hover:border-slate-200/50 dark:hover:border-slate-800/80 rounded-xl p-2 -m-2"
+        }`}
+      >
+        {isFocused && (
+          <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-full px-3 py-1 shadow-lg flex items-center gap-3 text-xs z-30 no-print">
+            {onAdd && (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAdd();
+                }}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-0.5 cursor-pointer transition-colors text-[10px]"
+              >
+                <Plus size={10} /> Entry
+              </button>
+            )}
+            {onAdd && <div className="w-px h-3 bg-slate-200 dark:bg-slate-700" />}
+            
+            {/* Reordering handles */}
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (index > 0) handleMoveListItem(type, index, "up"); 
+              }} 
+              disabled={index === 0}
+              className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5"
+              title="Move Up"
+            >
+              <ArrowUp size={11} />
+            </button>
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (index < itemsArray.length - 1) handleMoveListItem(type, index, "down"); 
+              }} 
+              disabled={index === itemsArray.length - 1}
+              className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5"
+              title="Move Down"
+            >
+              <ArrowDown size={11} />
+            </button>
+            
+            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 font-serif font-bold text-[10px] p-0.5">T</button>
+            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 p-0.5"><Calendar size={12} /></button>
+            
+            {onDelete && (
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  onDelete(); 
+                  setFocusedItemId(null); 
+                }} 
+                className="text-red-400 hover:text-red-500 p-0.5"
+                title="Delete Entry"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
+            
+            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 p-0.5"><Settings size={12} /></button>
+          </div>
+        )}
+        {children}
+      </div>
+    );
+  };
 
   const fontConfig = FONTS[fontFamily] || FONTS.sans;
   const sizeConfig = SIZES[fontSize] || SIZES.sm;
@@ -286,16 +369,18 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     return (
       <div className={`print-section ${marginClass}`}>
         {renderSectionHeader("Professional Summary")}
-        <div className="text-gray-700 text-justify">
-          <EditableField
-            value={personalInfo.summary}
-            placeholder="Introduce yourself, your career history, and core competencies..."
-            onSave={(val) => handlePersonalChange("summary", val)}
-            isTextArea={true}
-            isPrintView={isPrintView}
-            className={`${leadingClass} text-xs text-justify`}
-          />
-        </div>
+        <EditorItemBox id="summary" type="summary" index={0} itemsArray={[]}>
+          <div className="text-gray-700 text-justify">
+            <EditableField
+              value={personalInfo.summary}
+              placeholder="Introduce yourself, your career history, and core competencies..."
+              onSave={(val) => handlePersonalChange("summary", val)}
+              isTextArea={true}
+              isPrintView={isPrintView}
+              className={`${leadingClass} text-xs text-justify`}
+            />
+          </div>
+        </EditorItemBox>
       </div>
     );
   };
@@ -312,24 +397,19 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
         <div className="space-y-4">
           {experience.map((exp, idx) => (
-            <div key={exp.id || idx} className="editable-item-wrap group p-2 -m-2">
-              
-              {/* Item controls on hover (Hidden in Print) */}
-              {!isPrintView && (
-                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
-                  <button onClick={() => handleMoveListItem("experience", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
-                  <button onClick={() => handleMoveListItem("experience", idx, "down")} disabled={idx === experience.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
-                  <button 
-                    onClick={() => onAIEnhance({ type: "experience", id: exp.id, text: exp.description, context: exp.role })} 
-                    className="p-0.5 hover:bg-slate-800 text-indigo-400 rounded cursor-pointer"
-                    title="Optimize with AI"
-                  >
-                    <Sparkles size={11} />
-                  </button>
-                  <button onClick={() => handleDeleteListItem("experience", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
-                </div>
-              )}
-
+            <EditorItemBox 
+              key={exp.id || idx}
+              id={exp.id || `exp-${idx}`}
+              type="experience"
+              index={idx}
+              itemsArray={experience}
+              onAdd={() => {
+                const newItem = { id: `exp-${Date.now()}`, company: "New Company", role: "Job Title", location: "City, State", startDate: "2024-01", endDate: "Present", description: "• Engineered scaling features..." };
+                onChange({ ...data, experience: [...experience, newItem] });
+                setFocusedItemId(newItem.id);
+              }}
+              onDelete={() => handleDeleteListItem("experience", idx)}
+            >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
                   <EditableField
@@ -412,7 +492,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 )}
               </div>
 
-            </div>
+            </EditorItemBox>
           ))}
 
           {!isPrintView && (
@@ -441,16 +521,19 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
         <div className="space-y-4">
           {education.map((edu, idx) => (
-            <div key={edu.id || idx} className="editable-item-wrap group p-2 -m-2">
-              
-              {!isPrintView && (
-                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
-                  <button onClick={() => handleMoveListItem("education", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
-                  <button onClick={() => handleMoveListItem("education", idx, "down")} disabled={idx === education.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
-                  <button onClick={() => handleDeleteListItem("education", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
-                </div>
-              )}
-
+            <EditorItemBox 
+              key={edu.id || idx}
+              id={edu.id || `edu-${idx}`}
+              type="education"
+              index={idx}
+              itemsArray={education}
+              onAdd={() => {
+                const newItem = { id: `edu-${Date.now()}`, institution: "University Name", degree: "Degree Title", location: "City, State", graduationDate: "2024", details: "Major coursework..." };
+                onChange({ ...data, education: [...education, newItem] });
+                setFocusedItemId(newItem.id);
+              }}
+              onDelete={() => handleDeleteListItem("education", idx)}
+            >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
                   <EditableField
@@ -524,7 +607,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 />
               </div>
 
-            </div>
+            </EditorItemBox>
           ))}
 
           {!isPrintView && (
@@ -553,23 +636,19 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
         <div className="space-y-4">
           {projects.map((proj, idx) => (
-            <div key={proj.id || idx} className="editable-item-wrap group p-2 -m-2">
-              
-              {!isPrintView && (
-                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
-                  <button onClick={() => handleMoveListItem("projects", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
-                  <button onClick={() => handleMoveListItem("projects", idx, "down")} disabled={idx === projects.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
-                  <button 
-                    onClick={() => onAIEnhance({ type: "project", id: proj.id, text: proj.description, context: proj.title })} 
-                    className="p-0.5 hover:bg-slate-800 text-indigo-400 rounded cursor-pointer"
-                    title="Optimize with AI"
-                  >
-                    <Sparkles size={11} />
-                  </button>
-                  <button onClick={() => handleDeleteListItem("projects", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
-                </div>
-              )}
-
+            <EditorItemBox 
+              key={proj.id || idx}
+              id={proj.id || `proj-${idx}`}
+              type="projects"
+              index={idx}
+              itemsArray={projects}
+              onAdd={() => {
+                const newItem = { id: `proj-${Date.now()}`, title: "New Project", techStack: "Technologies Used", link: "", description: "• Constructed frontend interfaces..." };
+                onChange({ ...data, projects: [...projects, newItem] });
+                setFocusedItemId(newItem.id);
+              }}
+              onDelete={() => handleDeleteListItem("projects", idx)}
+            >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
                   <EditableField
@@ -636,7 +715,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 )}
               </div>
 
-            </div>
+            </EditorItemBox>
           ))}
 
           {!isPrintView && (
@@ -686,47 +765,52 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
         <div className="space-y-2.5">
           {skills.map((skill, idx) => (
-            <div key={skill.id || idx} className="editable-item-wrap group p-2 -m-2 flex items-start gap-2.5">
-              
-              {!isPrintView && (
-                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
-                  <button onClick={() => handleMoveListItem("skills", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
-                  <button onClick={() => handleMoveListItem("skills", idx, "down")} disabled={idx === skills.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
-                  <button onClick={() => handleDeleteListItem("skills", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
-                </div>
-              )}
-
-              <div className="w-24 shrink-0 text-left font-bold text-gray-900 text-[10.5px] pt-1">
-                <EditableField
-                  value={skill.category}
-                  placeholder="Category"
-                  onSave={(val) => {
-                    const updated = skills.map((e, i) => i === idx ? { ...e, category: val } : e);
-                    onChange({ ...data, skills: updated });
-                  }}
-                  isPrintView={isPrintView}
-                  className="font-bold text-gray-900"
-                />
-              </div>
-
-              <div className="flex-1">
-                {isPrintView ? (
-                  renderSkillPills(skill.items, idx)
-                ) : (
+            <EditorItemBox 
+              key={skill.id || idx}
+              id={skill.id || `skill-${idx}`}
+              type="skills"
+              index={idx}
+              itemsArray={skills}
+              onAdd={() => {
+                const newItem = { id: `skill-${Date.now()}`, category: "Category Title", items: "Skill A, Skill B, Skill C" };
+                onChange({ ...data, skills: [...skills, newItem] });
+                setFocusedItemId(newItem.id);
+              }}
+              onDelete={() => handleDeleteListItem("skills", idx)}
+            >
+              <div className="flex items-start gap-2.5 w-full">
+                <div className="w-24 shrink-0 text-left font-bold text-gray-900 text-[10.5px] pt-1">
                   <EditableField
-                    value={skill.items}
-                    placeholder="Item 1, Item 2, Item 3"
+                    value={skill.category}
+                    placeholder="Category"
                     onSave={(val) => {
-                      const updated = skills.map((e, i) => i === idx ? { ...e, items: val } : e);
+                      const updated = skills.map((e, i) => i === idx ? { ...e, category: val } : e);
                       onChange({ ...data, skills: updated });
                     }}
                     isPrintView={isPrintView}
-                    className="text-gray-700 text-xs w-full block"
+                    className="font-bold text-gray-900"
                   />
-                )}
+                </div>
+
+                <div className="flex-1">
+                  {isPrintView ? (
+                    renderSkillPills(skill.items, idx)
+                  ) : (
+                    <EditableField
+                      value={skill.items}
+                      placeholder="Item 1, Item 2, Item 3"
+                      onSave={(val) => {
+                        const updated = skills.map((e, i) => i === idx ? { ...e, items: val } : e);
+                        onChange({ ...data, skills: updated });
+                      }}
+                      isPrintView={isPrintView}
+                      className="text-gray-700 text-xs w-full block"
+                    />
+                  )}
+                </div>
               </div>
 
-            </div>
+            </EditorItemBox>
           ))}
 
           {!isPrintView && (

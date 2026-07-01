@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { 
-  FileText, Download, RotateCcw, Trash2, Sparkles, Layout, Eye, Settings, Heart, ArrowLeft, RefreshCw, Sun, Moon 
+  FileText, Download, RotateCcw, Trash2, Sparkles, Layout, Eye, Settings, Heart, ArrowLeft, RefreshCw, Sun, Moon,
+  Undo, Redo, History, Link, CheckCircle2, ArrowDownUp
 } from "lucide-react";
 import AuthGate from "./components/AuthGate";
 import Dashboard from "./components/Dashboard";
@@ -29,7 +30,8 @@ export default function App() {
   const [resumes, setResumes] = useState([]);
   const [activeResume, setActiveResume] = useState(null);
   const [activeAIRequest, setActiveAIRequest] = useState(null);
-  const [isAIPanelOpen, setIsAIPanelOpen] = useState(true);
+  const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
 
   // Load resumes when user logs in
   useEffect(() => {
@@ -224,23 +226,10 @@ export default function App() {
             </p>
           </div>
         </div>
-
+        
         {/* Toolbar Controls */}
         <div className="flex items-center gap-2">
-          
-          {/* Day / Night Theme Manual Toggle */}
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className={`p-1.5 rounded-lg border cursor-pointer transition-all ${
-              theme === "dark" 
-                ? "border-dark-border bg-slate-900/40 text-yellow-400 hover:text-yellow-300" 
-                : "border-slate-200 bg-white text-indigo-600 hover:bg-slate-100 shadow-sm"
-            }`}
-            title={theme === "dark" ? "Switch to Day Theme" : "Switch to Night Theme"}
-          >
-            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
-
+          {/* Improve text button with badge */}
           <button
             onClick={() => setIsAIPanelOpen(!isAIPanelOpen)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
@@ -248,20 +237,92 @@ export default function App() {
                 ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400" 
                 : "border-dark-border bg-slate-900/40 text-gray-300 hover:text-white"
             }`}
+            title="Improve text (AI Suggestions)"
           >
-            <Sparkles size={14} className={isAIPanelOpen ? "animate-pulse" : ""} />
-            <span>AI Assistant</span>
-            {activeAIRequest && (
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping ml-0.5" />
-            )}
+            <Sparkles size={13} className={isAIPanelOpen ? "animate-pulse" : ""} />
+            <span>Improve text</span>
+            <span className="bg-red-500 text-white font-extrabold text-[9px] px-1.5 py-0.2 rounded-full">3</span>
           </button>
 
+          {/* ATS Check button */}
           <button
-            onClick={handleDownloadPDF}
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg shadow-indigo-600/20 cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
+            onClick={() => {
+              setIsAIPanelOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dark-border bg-slate-900/40 text-gray-300 hover:text-white cursor-pointer transition-all"
+            title="Perform ATS Optimization Audit"
           >
-            <Download size={14} />
-            <span>Download PDF</span>
+            <CheckCircle2 size={13} />
+            <span>ATS Check</span>
+          </button>
+
+          {/* Rearrange button */}
+          <button
+            onClick={() => {
+              alert("Rearrange Mode Activated: Drag or use arrow controls on cards to shift sections.");
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dark-border bg-slate-900/40 text-gray-300 hover:text-white cursor-pointer transition-all"
+            title="Reorder and Shift Resume Sections"
+          >
+            <ArrowDownUp size={13} />
+            <span>Rearrange</span>
+          </button>
+
+          {/* Templates button */}
+          <button
+            onClick={() => setActiveResume(null)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dark-border bg-slate-900/40 text-gray-300 hover:text-white cursor-pointer transition-all"
+            title="Choose a Different Template"
+          >
+            <FileText size={13} />
+            <span>Templates</span>
+          </button>
+
+          {/* Design & Font button */}
+          <button
+            onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+              isLeftSidebarOpen 
+                ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400" 
+                : "border-dark-border bg-slate-900/40 text-gray-300 hover:text-white"
+            }`}
+            title="Configure Fonts, Margins and Spacing"
+          >
+            <Layout size={13} />
+            <span>Design & Font</span>
+          </button>
+        </div>
+
+        {/* Right side Undo, Redo, History, and Theme */}
+        <div className="flex items-center gap-2">
+          {/* Undo */}
+          <button className="p-1.5 rounded-lg border border-dark-border bg-slate-900/40 text-gray-400 hover:text-white cursor-pointer" title="Undo">
+            <Undo size={14} />
+          </button>
+
+          {/* Redo */}
+          <button className="p-1.5 rounded-lg border border-dark-border bg-slate-900/40 text-gray-400 hover:text-white cursor-pointer" title="Redo">
+            <Redo size={14} />
+          </button>
+
+          {/* History */}
+          <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-dark-border bg-slate-900/40 text-gray-400 hover:text-white text-xs cursor-pointer" title="Version History">
+            <History size={13} />
+            <span>History</span>
+          </button>
+
+          <div className="w-px h-4 bg-slate-800 mx-1" />
+
+          {/* Day / Night Theme */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`p-1.5 rounded-lg border cursor-pointer transition-all ${
+              theme === "dark" 
+                ? "border-dark-border bg-slate-900/40 text-yellow-400 hover:text-yellow-300" 
+                : "border-slate-200 bg-white text-indigo-600 hover:bg-slate-100 shadow-sm"
+            }`}
+          >
+            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
           </button>
         </div>
       </header>
@@ -270,18 +331,54 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Left Column: Form Editor */}
-        <main className="no-print w-[24%] border-r border-dark-border bg-dark-card/50 overflow-y-auto p-5 shrink-0">
-          <ResumeEditor 
-            data={activeResume} 
-            onChange={handleResumeChange} 
-            onAIEnhance={handleAIEnhanceRequest}
-          />
-        </main>
+        {isLeftSidebarOpen && (
+          <main className="no-print w-[24%] border-r border-dark-border bg-dark-card/50 overflow-y-auto p-5 shrink-0">
+            <ResumeEditor 
+              data={activeResume} 
+              onChange={handleResumeChange} 
+              onAIEnhance={handleAIEnhanceRequest}
+            />
+          </main>
+        )}
 
         {/* Center Column: Live Sheet Preview */}
-        <section className="no-print flex-1 bg-slate-950/60 overflow-y-auto p-8 flex flex-col items-center">
+        <section className="no-print flex-1 bg-slate-950/60 overflow-y-auto p-8 flex flex-col items-center relative">
+          
+          {/* Floating Actions Stack on the right side of A4 sheet */}
+          <div className="fixed right-6 top-28 flex flex-col gap-2.5 z-20">
+            {/* View Mode Toggle */}
+            <button 
+              onClick={() => {
+                alert("Preview mode activated: PDF formatting optimized.");
+              }}
+              className="bg-white dark:bg-slate-900 border border-slate-200/85 dark:border-slate-800 text-slate-500 hover:text-indigo-400 p-2.5 rounded-xl shadow-lg cursor-pointer transition-all hover:scale-105" 
+              title="Toggle View Mode"
+            >
+              <Eye size={16} />
+            </button>
+            {/* Download PDF */}
+            <button 
+              onClick={handleDownloadPDF} 
+              className="bg-white dark:bg-slate-900 border border-slate-200/85 dark:border-slate-800 text-slate-500 hover:text-indigo-400 p-2.5 rounded-xl shadow-lg cursor-pointer transition-all hover:scale-105" 
+              title="Download PDF"
+            >
+              <Download size={16} />
+            </button>
+            {/* Share Link */}
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                alert("ApexCV public link copied to clipboard!");
+              }}
+              className="bg-white dark:bg-slate-900 border border-slate-200/85 dark:border-slate-800 text-slate-500 hover:text-indigo-400 p-2.5 rounded-xl shadow-lg cursor-pointer transition-all hover:scale-105" 
+              title="Share Link"
+            >
+              <Link size={16} />
+            </button>
+          </div>
+
           <div className="mb-4 flex items-center justify-between w-[210mm] max-w-full text-xs text-gray-400">
-            <span>Interactive Preview Canvas</span>
+            <span>Interactive Preview Canvas (Click boxes to edit inline)</span>
             <span>A4 Portrait Layout</span>
           </div>
           
