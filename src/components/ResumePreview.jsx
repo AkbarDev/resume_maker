@@ -143,7 +143,8 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     columnRatio = "60-40",
     disabledSections = [],
     leftColumnSections = ["summary", "experience", "education", "projects"],
-    rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
+    rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
+    sectionOrder = ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
   } = layoutSettings;
 
   // Simple Toggle Switch
