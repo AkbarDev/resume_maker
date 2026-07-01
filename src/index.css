@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Lato:wght@300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,6 +6,9 @@
   --font-outfit: "Outfit", sans-serif;
   --font-playfair: "Playfair Display", serif;
   --font-fira: "Fira Code", monospace;
+  --font-lato: "Lato", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-lora: "Lora", serif;
   
   --color-brand-primary: #6366f1;
   --color-brand-secondary: #4f46e5;
@@ -32,7 +35,7 @@
 
 /* A4/Letter size preview sheet styles */
 .resume-preview-sheet {
-  aspect-ratio: 1 / 1.4142; /* A4 aspect ratio */
+  min-height: 297mm;
   width: 100%;
   background: white;
   color: black;
@@ -40,6 +43,7 @@
   transition: all 0.2s ease;
   overflow: hidden;
   position: relative;
+  box-sizing: border-box;
 }
 
 /* Print styles */
@@ -48,7 +52,7 @@
     height: auto;
     background: #fff !important;
     color: #000 !important;
-    font-size: 12pt;
+    font-size: 11pt;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -101,4 +105,44 @@
 /* Custom interactive dots */
 .glow-effect:hover {
   box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+/* Interactive editable layout elements */
+.editable-element {
+  position: relative;
+  transition: all 0.1s ease;
+  outline: none;
+}
+
+.editable-item-wrap {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.editable-item-wrap:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  background-color: rgba(99, 102, 241, 0.02);
+}
+
+.editable-item-controls {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.editable-item-wrap:hover .editable-item-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Custom SVG chart animations */
+.pie-segment {
+  transition: stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.pie-segment:hover {
+  filter: brightness(1.1);
 }

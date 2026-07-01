@@ -539,7 +539,18 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                       projects: INITIAL_RESUME_DATA.projects,
                       skills: INITIAL_RESUME_DATA.skills,
                       certifications: INITIAL_RESUME_DATA.certifications,
-                      layoutSettings: tpl.settings
+                      strengths: INITIAL_RESUME_DATA.strengths,
+                      languages: INITIAL_RESUME_DATA.languages,
+                      achievements: INITIAL_RESUME_DATA.achievements,
+                      passions: INITIAL_RESUME_DATA.passions,
+                      books: INITIAL_RESUME_DATA.books,
+                      quotes: INITIAL_RESUME_DATA.quotes,
+                      dayInLife: INITIAL_RESUME_DATA.dayInLife,
+                      customSections: INITIAL_RESUME_DATA.customSections || [],
+                      layoutSettings: {
+                        ...INITIAL_RESUME_DATA.layoutSettings,
+                        ...tpl.settings
+                      }
                     }, `${tpl.name} Draft`)}
                     className="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white font-bold text-[10px] py-2 px-3 rounded-lg border border-indigo-500/20 text-center cursor-pointer transition-all"
                   >
@@ -548,8 +559,23 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                   <button
                     onClick={() => onCreateNew({
                       personalInfo: { firstName: "", lastName: "", title: "", email: "", phone: "", location: "", website: "", linkedin: "", github: "", summary: "" },
-                      experience: [], education: [], projects: [], skills: [], certifications: [],
-                      layoutSettings: tpl.settings
+                      experience: [], 
+                      education: [], 
+                      projects: [], 
+                      skills: [], 
+                      certifications: [],
+                      strengths: [],
+                      languages: [],
+                      achievements: [],
+                      passions: [],
+                      books: [],
+                      quotes: [],
+                      dayInLife: [],
+                      customSections: [],
+                      layoutSettings: {
+                        ...INITIAL_RESUME_DATA.layoutSettings,
+                        ...tpl.settings
+                      }
                     }, `My ${tpl.name}`)}
                     className="border border-dark-border hover:border-gray-500 bg-slate-900/40 text-gray-300 hover:text-white font-semibold text-[10px] py-2 px-3 rounded-lg text-center cursor-pointer transition-all"
                   >

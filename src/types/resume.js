@@ -19,7 +19,7 @@ export const INITIAL_RESUME_DATA = {
       location: "San Francisco, CA",
       startDate: "2023-03",
       endDate: "Present",
-      description: "• Architected and migrated legacy monolith to micro-frontends (React/Next.js) resulting in a 40% improvement in page loading speed.\n• Directed a team of 6 engineers to deliver an real-time analytics dashboard using WebSocket and Redis, processing 5M+ daily requests.\n• Established CI/CD pipelines on AWS (GitHub Actions, ECS, Fargate) reducing production deployment cycles from 2 days to 15 minutes.\n• Mentored junior engineers, introduced TDD practices, and increased unit test coverage from 45% to 88%."
+      description: "• Architected and migrated legacy monolith to micro-frontends (React/Next.js) resulting in a 40% improvement in page loading speed.\n• Directed a team of 6 engineers to deliver a real-time analytics dashboard using WebSockets and Redis, processing 5M+ daily requests.\n• Established CI/CD pipelines on AWS (GitHub Actions, ECS, Fargate) reducing production deployment cycles from 2 days to 15 minutes.\n• Mentored junior engineers, introduced TDD practices, and increased unit test coverage from 45% to 88%."
     },
     {
       id: "exp-2",
@@ -48,20 +48,12 @@ export const INITIAL_RESUME_DATA = {
       techStack: "React, TailwindCSS, Node.js, MongoDB",
       link: "https://github.com/sarahj-codes/flowstate",
       description: "• Built a real-time collaborative kanban board task manager with drag-and-drop support (React DnD).\n• Structured real-time updates using Socket.io and database change streams for instant sync across active tabs.\n• Designed and styled the interface with complex accessibility (WCAG 2.1 AA) compliance."
-    },
-    {
-      id: "proj-2",
-      title: "DocuSummarize API",
-      techStack: "Python, FastAPI, Hugging Face Hub, Docker",
-      link: "https://github.com/sarahj-codes/docusummarize",
-      description: "• Engineered a microservice that parses PDF documents and generates high-fidelity executive summaries using a fine-tuned BART model.\n• Deployed containerized service using Docker and FastAPI, achieving sub-2-second response times for documents up to 50 pages."
     }
   ],
   skills: [
     { id: "skill-1", category: "Languages", items: "JavaScript (ES6+), TypeScript, HTML5/CSS3, Python, SQL" },
     { id: "skill-2", category: "Frameworks & Libs", items: "React, Next.js, Node.js, Express, FastAPI, Tailwind CSS" },
-    { id: "skill-3", category: "Tools & Cloud", items: "Git, AWS (S3, EC2, ECS), Docker, PostgreSQL, MongoDB, Redis" },
-    { id: "skill-4", category: "Methodologies", items: "Agile/Scrum, CI/CD, Test-Driven Development (TDD), RESTful APIs" }
+    { id: "skill-3", category: "Tools & Cloud", items: "Git, AWS (S3, EC2, ECS), Docker, PostgreSQL, MongoDB, Redis" }
   ],
   certifications: [
     {
@@ -72,23 +64,61 @@ export const INITIAL_RESUME_DATA = {
       link: ""
     }
   ],
+  strengths: [
+    { id: "str-1", name: "Problem Solving", description: "Approaching challenges analytically to find optimal, scalable solutions." },
+    { id: "str-2", name: "Technical Leadership", description: "Guiding development squads and establishing clean code methodologies." }
+  ],
+  languages: [
+    { id: "lang-1", name: "English", level: "Native / Bilingual", rating: 5 },
+    { id: "lang-2", name: "Spanish", level: "Intermediate", rating: 3 }
+  ],
+  achievements: [
+    { id: "ach-1", text: "Successfully migrated 12 legacy services with zero production downtime." },
+    { id: "ach-2", text: "Awarded Innovator of the Year out of 150+ engineers in 2024." }
+  ],
+  passions: [
+    { id: "pass-1", name: "Open Source Coding", description: "Contributing back to core javascript frameworks and developer toolings." }
+  ],
+  books: [
+    { id: "book-1", title: "Clean Code", author: "Robert C. Martin" },
+    { id: "book-2", title: "Designing Data-Intensive Applications", author: "Martin Kleppmann" }
+  ],
+  quotes: [
+    { id: "quote-1", text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" }
+  ],
+  dayInLife: [
+    { id: "dil-1", activity: "Deep Work & Architecture", percentage: 50 },
+    { id: "dil-2", activity: "Team Sync & Mentoring", percentage: 20 },
+    { id: "dil-3", activity: "Research & Learning", percentage: 15 },
+    { id: "dil-4", activity: "Code Reviews & Testing", percentage: 15 }
+  ],
+  customSections: [],
   layoutSettings: {
-    template: "modern", // classic, modern, minimal, elegant
+    template: "modern", // classic, modern, minimal, creative
+    layoutStyle: "double", // single, double
+    columnRatio: "60-40", // "50-50", "60-40", "70-30"
     primaryColor: "#0f172a", // Slate 900
-    accentColor: "#2563eb", // Blue 600
+    accentColor: "#4f46e5", // Indigo 600
     fontSize: "sm", // xs, sm, base, lg
-    spacing: "compact", // compact, normal, loose
-    fontFamily: "sans" // sans, serif, mono
+    spacing: "normal", // compact, normal, loose
+    fontFamily: "sans", // sans, lato, montserrat, lora, serif, mono
+    lineHeight: "normal", // tight, normal, relaxed
+    marginSize: "normal", // compact, normal, loose
+    headingStyle: "accent", // line, accent, block, clean
+    leftColumnSections: ["summary", "experience", "education", "projects"],
+    rightColumnSections: ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
+    sectionOrder: ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
   }
 };
 
 export const COLOR_PRESETS = [
-  { name: "Slate", primary: "#0f172a", accent: "#3b82f6" },
-  { name: "Emerald", primary: "#064e3b", accent: "#10b981" },
-  { name: "Indigo", primary: "#1e1b4b", accent: "#6366f1" },
-  { name: "Burgundy", primary: "#450a0a", accent: "#ef4444" },
-  { name: "Teal", primary: "#115e59", accent: "#14b8a6" },
-  { name: "Charcoal", primary: "#1f2937", accent: "#4b5563" }
+  { name: "Charcoal & Indigo", primary: "#0f172a", accent: "#4f46e5" },
+  { name: "Sleek Dark Slate", primary: "#1e293b", accent: "#6366f1" },
+  { name: "Emerald Forest", primary: "#064e3b", accent: "#10b981" },
+  { name: "Deep Burgundy", primary: "#450a0a", accent: "#ef4444" },
+  { name: "Ocean Teal", primary: "#115e59", accent: "#14b8a6" },
+  { name: "Minimal Graphite", primary: "#1f2937", accent: "#4b5563" },
+  { name: "Midnight Violet", primary: "#1e1b4b", accent: "#8b5cf6" }
 ];
 
 export const FONTS = {
@@ -96,6 +126,21 @@ export const FONTS = {
     label: "Outfit / Inter",
     headingClass: "font-outfit font-bold",
     bodyClass: "font-inter"
+  },
+  lato: {
+    label: "Lato / Open Sans",
+    headingClass: "font-lato font-bold",
+    bodyClass: "font-lato"
+  },
+  montserrat: {
+    label: "Montserrat / Raleway",
+    headingClass: "font-montserrat font-extrabold",
+    bodyClass: "font-montserrat"
+  },
+  lora: {
+    label: "Lora / Roboto",
+    headingClass: "font-lora font-bold",
+    bodyClass: "font-lora"
   },
   serif: {
     label: "Playfair / Georgia",
@@ -111,34 +156,34 @@ export const FONTS = {
 
 export const SIZES = {
   xs: {
-    body: "text-xs",
-    h1: "text-xl",
-    h2: "text-sm",
-    h3: "text-xs",
+    body: "text-[10px]",
+    h1: "text-[18px]",
+    h2: "text-[12px]",
+    h3: "text-[10px]",
     spacing: "gap-1",
-    sectionSpacing: "mb-3"
+    sectionSpacing: "mb-2"
   },
   sm: {
-    body: "text-sm",
-    h1: "text-2xl",
-    h2: "text-base",
-    h3: "text-sm",
+    body: "text-[12px]",
+    h1: "text-[22px]",
+    h2: "text-[14px]",
+    h3: "text-[12px]",
     spacing: "gap-1.5",
-    sectionSpacing: "mb-4"
+    sectionSpacing: "mb-3.5"
   },
   base: {
-    body: "text-base",
-    h1: "text-3xl",
-    h2: "text-lg",
-    h3: "text-base",
+    body: "text-[14px]",
+    h1: "text-[26px]",
+    h2: "text-[16px]",
+    h3: "text-[14px]",
     spacing: "gap-2",
-    sectionSpacing: "mb-5"
+    sectionSpacing: "mb-4.5"
   },
   lg: {
-    body: "text-lg",
-    h1: "text-4xl",
-    h2: "text-xl",
-    h3: "text-lg",
+    body: "text-[16px]",
+    h1: "text-[30px]",
+    h2: "text-[18px]",
+    h3: "text-[16px]",
     spacing: "gap-2.5",
     sectionSpacing: "mb-6"
   }

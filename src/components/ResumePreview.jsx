@@ -1,8 +1,77 @@
-import React from "react";
-import { Mail, Phone, MapPin, Globe, ExternalLink } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, Globe, ExternalLink, Plus, Trash2, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { FONTS, SIZES } from "../types/resume";
 
-const Linkedin = ({ size = 16, className = "" }) => (
+// Simple Inline-Editable Component
+function EditableField({ value, placeholder, onSave, className = "", isTextArea = false, isPrintView = false }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempValue, setTempValue] = useState(value || "");
+
+  useEffect(() => {
+    setTempValue(value || "");
+  }, [value]);
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    onSave(tempValue);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isTextArea && e.key === "Enter") {
+      e.preventDefault();
+      setIsEditing(false);
+      onSave(tempValue);
+    }
+  };
+
+  // If we are in print view, don't allow edits and don't render placeholders
+  if (isPrintView) {
+    return value ? <span className={className}>{value}</span> : null;
+  }
+
+  if (isEditing) {
+    if (isTextArea) {
+      return (
+        <textarea
+          value={tempValue}
+          onChange={(e) => setTempValue(e.target.value)}
+          onBlur={handleBlur}
+          className="w-full bg-slate-100 border border-indigo-500 rounded p-1 text-gray-950 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-inherit leading-normal"
+          autoFocus
+          rows={3}
+          placeholder={placeholder}
+        />
+      );
+    }
+    return (
+      <input
+        type="text"
+        value={tempValue}
+        onChange={(e) => setTempValue(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        className="bg-slate-100 border border-indigo-500 rounded px-1 py-0.5 text-gray-950 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-inherit inline-block"
+        autoFocus
+        placeholder={placeholder}
+      />
+    );
+  }
+
+  const isEmpty = !value;
+  return (
+    <span
+      onClick={() => setIsEditing(true)}
+      className={`cursor-text hover:bg-slate-100 rounded px-0.5 py-0.2 -mx-0.5 transition-colors border border-transparent hover:border-slate-200/60 inline-block min-w-[20px] ${
+        isEmpty ? "text-gray-400 italic text-[11px] font-normal" : ""
+      } ${className}`}
+    >
+      {isEmpty ? placeholder : value}
+    </span>
+  );
+}
+
+// Simple SVG Icons
+const Linkedin = ({ size = 12, className = "" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -21,7 +90,7 @@ const Linkedin = ({ size = 16, className = "" }) => (
   </svg>
 );
 
-const Github = ({ size = 16, className = "" }) => (
+const Github = ({ size = 12, className = "" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
@@ -39,13 +108,40 @@ const Github = ({ size = 16, className = "" }) => (
   </svg>
 );
 
-export default function ResumePreview({ data, isPrintView = false }) {
-  const { personalInfo, experience, education, projects, skills, certifications, layoutSettings } = data;
+export default function ResumePreview({ data, onChange = () => {}, onAIEnhance = () => {}, isPrintView = false }) {
   const { 
-    template, primaryColor, accentColor, fontSize, spacing, fontFamily,
-    sectionOrder = ["summary", "experience", "education", "projects", "skills", "certifications"],
-    lineHeight = "normal", // tight, normal, relaxed
-    marginSize = "normal" // compact, normal, loose
+    personalInfo = {}, 
+    experience = [], 
+    education = [], 
+    projects = [], 
+    skills = [], 
+    certifications = [], 
+    strengths = [],
+    languages = [],
+    achievements = [],
+    passions = [],
+    books = [],
+    quotes = [],
+    dayInLife = [],
+    customSections = [],
+    layoutSettings = {} 
+  } = data;
+
+  const { 
+    template = "modern", 
+    primaryColor = "#0f172a", 
+    accentColor = "#4f46e5", 
+    fontSize = "sm", 
+    spacing = "normal", 
+    fontFamily = "sans",
+    lineHeight = "normal", 
+    marginSize = "normal",
+    headingStyle = "accent",
+    layoutStyle = "double",
+    columnRatio = "60-40",
+    disabledSections = [],
+    leftColumnSections = ["summary", "experience", "education", "projects"],
+    rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
   } = layoutSettings;
 
   const fontConfig = FONTS[fontFamily] || FONTS.sans;
@@ -53,9 +149,9 @@ export default function ResumePreview({ data, isPrintView = false }) {
 
   // Custom margin map
   const marginClass = {
-    compact: "mb-2.5",
-    normal: "mb-4.5",
-    loose: "mb-7"
+    compact: "mb-2",
+    normal: "mb-4",
+    loose: "mb-6"
   }[marginSize];
 
   // Custom line height map
@@ -67,12 +163,12 @@ export default function ResumePreview({ data, isPrintView = false }) {
 
   // Spacing padding map
   const paddingClass = {
-    compact: "p-6",
-    normal: "p-8",
-    loose: "p-10"
+    compact: "p-4.5",
+    normal: "p-7",
+    loose: "p-9.5"
   }[spacing];
 
-  // Helper colors style objects
+  // Style objects
   const primaryStyle = { color: primaryColor };
   const borderPrimaryStyle = { borderColor: primaryColor };
   const accentStyle = { color: accentColor };
@@ -80,472 +176,1560 @@ export default function ResumePreview({ data, isPrintView = false }) {
   const bgPrimaryStyle = { backgroundColor: primaryColor };
   const bgAccentStyle = { backgroundColor: accentColor };
 
-  // Initials badge builder
-  const renderInitialsBadge = (sizeClass = "w-11 h-11 text-xs") => {
-    const first = personalInfo.firstName?.[0] || "";
-    const last = personalInfo.lastName?.[0] || "";
-    if (!first && !last) return null;
-    return (
-      <div 
-        className={`${sizeClass} rounded-full flex items-center justify-center font-extrabold text-white shrink-0 shadow-sm uppercase`}
-        style={bgPrimaryStyle}
-      >
-        {first}{last}
-      </div>
-    );
+  // Helper to change personal info field
+  const handlePersonalChange = (key, value) => {
+    onChange({
+      ...data,
+      personalInfo: {
+        ...data.personalInfo,
+        [key]: value
+      }
+    });
   };
 
-  // Convert bullet points text to list
-  const renderBulletPoints = (text) => {
-    if (!text) return null;
-    return text.split("\n").map((line, idx) => {
+  // Reorder list helper
+  const handleMoveListItem = (section, idx, direction) => {
+    if (direction === "up" && idx === 0) return;
+    if (direction === "down" && idx === data[section].length - 1) return;
+
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    const updated = [...data[section]];
+    const temp = updated[idx];
+    updated[idx] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    onChange({ ...data, [section]: updated });
+  };
+
+  // Delete list helper
+  const handleDeleteListItem = (section, idx) => {
+    const updated = data[section].filter((_, i) => i !== idx);
+    onChange({ ...data, [section]: updated });
+  };
+
+  // Render bullet points from text
+  const renderBulletPoints = (text, placeholder = "• Click to edit description...") => {
+    if (!text && isPrintView) return null;
+    const lines = text ? text.split("\n") : [];
+    if (lines.length === 0) {
+      return (
+        <li className="list-none text-gray-400 italic">
+          {placeholder}
+        </li>
+      );
+    }
+    return lines.map((line, idx) => {
       const trimmed = line.trim();
-      if (!trimmed) return null;
+      if (!trimmed && isPrintView) return null;
       const displayLine = trimmed.startsWith("•") || trimmed.startsWith("-") 
         ? trimmed.substring(1).trim() 
         : trimmed;
       return (
-        <li key={idx} className={`${leadingClass} text-gray-700 list-none relative pl-4 before:content-['•'] before:absolute before:left-0 before:text-gray-400`}>
-          {displayLine}
+        <li key={idx} className={`${leadingClass} text-gray-700 list-none relative pl-4 before:content-['•'] before:absolute before:left-0 before:text-gray-400/80`}>
+          {displayLine || <span className="text-gray-300 italic">Empty point</span>}
         </li>
       );
     });
   };
 
-  // Convert comma separated list of skills to styled pills
-  const renderSkillPills = (itemsText) => {
-    if (!itemsText) return null;
-    return (
-      <div className="flex flex-wrap gap-1.5 mt-1.5">
-        {itemsText.split(",").map((s, i) => {
-          const trimmed = s.trim();
-          if (!trimmed) return null;
-          return (
-            <span 
-              key={i} 
-              className="px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-50 text-gray-700 border border-gray-200"
-            >
-              {trimmed}
-            </span>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const hasPersonalInfo = personalInfo.firstName || personalInfo.lastName;
-  const hasExperience = experience.length > 0 && experience.some(e => e.company || e.role);
-  const hasEducation = education.length > 0 && education.some(ed => ed.institution || ed.degree);
-  const hasProjects = projects.length > 0 && projects.some(p => p.title);
-  const hasSkills = skills.length > 0 && skills.some(s => s.category || s.items);
-  const hasCertifications = certifications.length > 0 && certifications.some(c => c.name);
-
-  // Sub-Sections Render Map
-  // ----------------------------------------------------
-  const renderSummarySection = () => {
-    if (!personalInfo.summary) return null;
-    return (
-      <div className={`print-section ${marginClass}`}>
-        {template !== "classic" && (
-          <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-2 flex items-center gap-2`}>
-            <span className="w-1 h-3 rounded" style={bgAccentStyle} /> Professional Summary
-          </h2>
-        )}
-        <p className={`${leadingClass} text-gray-700 text-justify text-xs`}>{personalInfo.summary}</p>
-      </div>
-    );
-  };
-
-  const renderExperienceSection = () => {
-    if (!hasExperience) return null;
-    return (
-      <div className={`print-section ${marginClass}`}>
-        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
-          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Professional Experience
+  // Render section decoration based on header style selection
+  const renderSectionHeader = (title) => {
+    if (headingStyle === "clean") {
+      return (
+        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-wider text-gray-800 uppercase pb-1 mb-2 font-black`}>
+          {title}
         </h2>
-        
-        {/* Timeline representation for Modern/Minimal templates */}
-        <div className={template === "modern" || template === "minimal" ? "relative border-l-2 ml-1.5 pl-5 space-y-4" : "space-y-4"}>
+      );
+    }
+
+    if (headingStyle === "line") {
+      return (
+        <h2 
+          className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-wider uppercase pb-1 mb-3 border-b-2 font-black`}
+          style={{ borderColor: accentColor, color: primaryColor }}
+        >
+          {title}
+        </h2>
+      );
+    }
+
+    if (headingStyle === "block") {
+      return (
+        <h2 
+          className={`${fontConfig.headingClass} text-[11px] text-white tracking-widest uppercase py-1.5 px-3 mb-3.5 rounded font-bold shadow-sm`}
+          style={{ backgroundColor: primaryColor }}
+        >
+          {title}
+        </h2>
+      );
+    }
+
+    // Default: "accent"
+    return (
+      <h2 
+        className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-900 uppercase mb-3.5 flex items-center gap-2 font-extrabold`}
+        style={primaryStyle}
+      >
+        <span className="w-1.5 h-3.5 rounded-sm" style={{ backgroundColor: accentColor }} />
+        <span>{title}</span>
+      </h2>
+    );
+  };
+
+  // SECTION RENDERS
+  // ----------------------------------------------------
+
+  const renderSummary = () => {
+    if (disabledSections.includes("summary")) return null;
+    const hasVal = personalInfo.summary;
+    if (!hasVal && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Professional Summary")}
+        <div className="text-gray-700 text-justify">
+          <EditableField
+            value={personalInfo.summary}
+            placeholder="Introduce yourself, your career history, and core competencies..."
+            onSave={(val) => handlePersonalChange("summary", val)}
+            isTextArea={true}
+            isPrintView={isPrintView}
+            className={`${leadingClass} text-xs text-justify`}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderExperience = () => {
+    if (disabledSections.includes("experience")) return null;
+    if (experience.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        <div className="flex justify-between items-baseline mb-2">
+          {renderSectionHeader("Work Experience")}
+        </div>
+
+        <div className="space-y-4">
           {experience.map((exp, idx) => (
-            <div key={exp.id} className="relative text-xs">
+            <div key={exp.id || idx} className="editable-item-wrap group p-2 -m-2">
               
-              {/* Timeline Connector Node */}
-              {(template === "modern" || template === "minimal") && (
-                <div 
-                  className="absolute -left-[27px] top-1 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm"
-                  style={{ backgroundColor: accentColor }}
-                />
+              {/* Item controls on hover (Hidden in Print) */}
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("experience", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
+                  <button onClick={() => handleMoveListItem("experience", idx, "down")} disabled={idx === experience.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
+                  <button 
+                    onClick={() => onAIEnhance({ type: "experience", id: exp.id, text: exp.description, context: exp.role })} 
+                    className="p-0.5 hover:bg-slate-800 text-indigo-400 rounded cursor-pointer"
+                    title="Optimize with AI"
+                  >
+                    <Sparkles size={11} />
+                  </button>
+                  <button onClick={() => handleDeleteListItem("experience", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
+                </div>
               )}
 
-              <div className="flex flex-wrap justify-between items-baseline font-bold text-gray-900">
-                <span className="text-[13px]">{exp.role} <span className="font-normal text-gray-500">| {exp.company}</span></span>
-                <span className="text-[10px] font-semibold uppercase shrink-0" style={accentStyle}>{exp.startDate} – {exp.endDate || "Present"}</span>
-              </div>
-              {exp.location && <div className="text-gray-500 italic text-[10px] mb-1">{exp.location}</div>}
-              
-              <ul className="list-disc pl-3.5 space-y-0.5 mt-1.5 text-gray-700">
-                {renderBulletPoints(exp.description)}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderEducationSection = () => {
-    if (!hasEducation) return null;
-    return (
-      <div className={`print-section ${marginClass}`}>
-        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
-          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Education
-        </h2>
-        <div className="space-y-3">
-          {education.map((edu) => (
-            <div key={edu.id} className="text-xs">
-              <div className="flex justify-between font-bold text-gray-900">
-                <span>{edu.degree} in {edu.fieldOfStudy}</span>
-                <span className="font-semibold text-[10px]" style={accentStyle}>{edu.graduationDate}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 italic">
-                <span>{edu.institution}</span>
-                {edu.location && <span>{edu.location}</span>}
-              </div>
-              {edu.details && <p className="text-gray-500 mt-1 leading-relaxed">{edu.details}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderProjectsSection = () => {
-    if (!hasProjects) return null;
-    return (
-      <div className={`print-section ${marginClass}`}>
-        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
-          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Featured Projects
-        </h2>
-        <div className="space-y-3">
-          {projects.map((proj) => (
-            <div key={proj.id} className="text-xs">
-              <div className="flex justify-between items-baseline font-bold text-gray-900">
+              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
-                  {proj.title}
+                  <EditableField
+                    value={exp.role}
+                    placeholder="Software Engineer"
+                    onSave={(val) => {
+                      const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
+                      onChange({ ...data, experience: updated });
+                    }}
+                    isPrintView={isPrintView}
+                    className="font-bold text-gray-900"
+                  />
+                  <span className="font-normal text-gray-400 mx-1.5">|</span>
+                  <EditableField
+                    value={exp.company}
+                    placeholder="Tech Corp"
+                    onSave={(val) => {
+                      const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
+                      onChange({ ...data, experience: updated });
+                    }}
+                    isPrintView={isPrintView}
+                    className="font-medium text-gray-600"
+                  />
+                </span>
+                <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase whitespace-nowrap" style={accentStyle}>
+                  <EditableField
+                    value={exp.startDate}
+                    placeholder="2022-01"
+                    onSave={(val) => {
+                      const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
+                      onChange({ ...data, experience: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                  <span className="mx-1">–</span>
+                  <EditableField
+                    value={exp.endDate}
+                    placeholder="Present"
+                    onSave={(val) => {
+                      const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
+                      onChange({ ...data, experience: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+              <div className="text-gray-500 italic text-[10px] mb-1 font-medium">
+                <EditableField
+                  value={exp.location}
+                  placeholder="San Francisco, CA"
+                  onSave={(val) => {
+                    const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
+                    onChange({ ...data, experience: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* Description Edit (clicking opens textarea to edit raw bullet list) */}
+              <div className="text-gray-700 text-xs">
+                {isPrintView ? (
+                  <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
+                    {renderBulletPoints(exp.description)}
+                  </ul>
+                ) : (
+                  <div className="mt-1 pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors">
+                    <EditableField
+                      value={exp.description}
+                      placeholder="• List your achievements...\n• Use action verbs and percentages..."
+                      onSave={(val) => {
+                        const updated = experience.map((e, i) => i === idx ? { ...e, description: val } : e);
+                        onChange({ ...data, experience: updated });
+                      }}
+                      isTextArea={true}
+                      isPrintView={isPrintView}
+                      className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                    />
+                  </div>
+                )}
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `exp-${Date.now()}`, company: "New Company", role: "Job Title", location: "City, State", startDate: "2024-01", endDate: "Present", description: "• Engineered scaling features..." };
+                onChange({ ...data, experience: [...experience, newItem] });
+              }}
+              className="w-full py-1.5 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={12} /> Add Experience
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEducation = () => {
+    if (disabledSections.includes("education")) return null;
+    if (education.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Education")}
+
+        <div className="space-y-4">
+          {education.map((edu, idx) => (
+            <div key={edu.id || idx} className="editable-item-wrap group p-2 -m-2">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("education", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
+                  <button onClick={() => handleMoveListItem("education", idx, "down")} disabled={idx === education.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
+                  <button onClick={() => handleDeleteListItem("education", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
+                </div>
+              )}
+
+              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
+                <span>
+                  <EditableField
+                    value={edu.degree}
+                    placeholder="B.S. Computer Science"
+                    onSave={(val) => {
+                      const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
+                      onChange({ ...data, education: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                  {edu.fieldOfStudy && (
+                    <>
+                      <span className="font-normal text-gray-400 mx-1">in</span>
+                      <EditableField
+                        value={edu.fieldOfStudy}
+                        placeholder="Field of Study"
+                        onSave={(val) => {
+                          const updated = education.map((e, i) => i === idx ? { ...e, fieldOfStudy: val } : e);
+                          onChange({ ...data, education: updated });
+                        }}
+                        isPrintView={isPrintView}
+                      />
+                    </>
+                  )}
+                </span>
+                <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
+                  <EditableField
+                    value={edu.graduationDate}
+                    placeholder="2020-05"
+                    onSave={(val) => {
+                      const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
+                      onChange({ ...data, education: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+              <div className="flex justify-between text-gray-600 italic text-[10px] font-medium">
+                <EditableField
+                  value={edu.institution}
+                  placeholder="University Name"
+                  onSave={(val) => {
+                    const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
+                    onChange({ ...data, education: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+                <EditableField
+                  value={edu.location}
+                  placeholder="Berkeley, CA"
+                  onSave={(val) => {
+                    const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
+                    onChange({ ...data, education: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              <div className="text-gray-500 mt-1 text-[10.5px]">
+                <EditableField
+                  value={edu.details}
+                  placeholder="GPA: 3.8/4.0. Core coursework..."
+                  onSave={(val) => {
+                    const updated = education.map((e, i) => i === idx ? { ...e, details: val } : e);
+                    onChange({ ...data, education: updated });
+                  }}
+                  isPrintView={isPrintView}
+                  className="w-full block leading-relaxed"
+                />
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `edu-${Date.now()}`, institution: "University Name", degree: "Degree Title", location: "City, State", graduationDate: "2024", details: "Major coursework..." };
+                onChange({ ...data, education: [...education, newItem] });
+              }}
+              className="w-full py-1.5 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={12} /> Add Education
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderProjects = () => {
+    if (disabledSections.includes("projects")) return null;
+    if (projects.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Featured Projects")}
+
+        <div className="space-y-4">
+          {projects.map((proj, idx) => (
+            <div key={proj.id || idx} className="editable-item-wrap group p-2 -m-2">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("projects", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
+                  <button onClick={() => handleMoveListItem("projects", idx, "down")} disabled={idx === projects.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
+                  <button 
+                    onClick={() => onAIEnhance({ type: "project", id: proj.id, text: proj.description, context: proj.title })} 
+                    className="p-0.5 hover:bg-slate-800 text-indigo-400 rounded cursor-pointer"
+                    title="Optimize with AI"
+                  >
+                    <Sparkles size={11} />
+                  </button>
+                  <button onClick={() => handleDeleteListItem("projects", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
+                </div>
+              )}
+
+              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
+                <span>
+                  <EditableField
+                    value={proj.title}
+                    placeholder="Project Name"
+                    onSave={(val) => {
+                      const updated = projects.map((e, i) => i === idx ? { ...e, title: val } : e);
+                      onChange({ ...data, projects: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
                   {proj.link && (
-                    <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-gray-600">
+                    <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-indigo-600 no-print">
                       <ExternalLink size={10} />
                     </a>
                   )}
                 </span>
-                {proj.techStack && <span className="text-[10px] font-normal text-gray-500 italic shrink-0">{proj.techStack}</span>}
+                <span className="text-[10px] font-normal text-gray-500 italic shrink-0">
+                  <EditableField
+                    value={proj.techStack}
+                    placeholder="React, Next.js, Node.js"
+                    onSave={(val) => {
+                      const updated = projects.map((e, i) => i === idx ? { ...e, techStack: val } : e);
+                      onChange({ ...data, projects: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
               </div>
-              <ul className="list-disc pl-3.5 space-y-0.5 mt-1.5 text-gray-700">
-                {renderBulletPoints(proj.description)}
-              </ul>
+
+              {/* Editable link (visible only in editor) */}
+              {!isPrintView && (
+                <div className="text-[9px] text-slate-400 mt-0.5">
+                  <EditableField
+                    value={proj.link}
+                    placeholder="Add Project Link (https://...)"
+                    onSave={(val) => {
+                      const updated = projects.map((e, i) => i === idx ? { ...e, link: val } : e);
+                      onChange({ ...data, projects: updated });
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="text-gray-700 text-xs mt-1">
+                {isPrintView ? (
+                  <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
+                    {renderBulletPoints(proj.description)}
+                  </ul>
+                ) : (
+                  <div className="pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors mt-0.5">
+                    <EditableField
+                      value={proj.description}
+                      placeholder="• Built a task manager...\n• Integrated stripe..."
+                      onSave={(val) => {
+                        const updated = projects.map((e, i) => i === idx ? { ...e, description: val } : e);
+                        onChange({ ...data, projects: updated });
+                      }}
+                      isTextArea={true}
+                      isPrintView={isPrintView}
+                      className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                    />
+                  </div>
+                )}
+              </div>
+
             </div>
           ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `proj-${Date.now()}`, title: "New Project", techStack: "Technologies Used", link: "", description: "• Constructed frontend interfaces..." };
+                onChange({ ...data, projects: [...projects, newItem] });
+              }}
+              className="w-full py-1.5 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={12} /> Add Project
+            </button>
+          )}
         </div>
       </div>
     );
   };
 
-  const renderSkillsSection = () => {
-    if (!hasSkills) return null;
+  const renderSkills = () => {
+    if (disabledSections.includes("skills")) return null;
+    if (skills.length === 0 && isPrintView) return null;
+
+    // Helper for rendering skills inside canvas
+    const renderSkillPills = (itemsText, sectionIdx) => {
+      if (!itemsText) return null;
+      return (
+        <div className="flex flex-wrap gap-1.5 mt-1.5">
+          {itemsText.split(",").map((s, i) => {
+            const trimmed = s.trim();
+            if (!trimmed) return null;
+            return (
+              <span 
+                key={i} 
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-50 text-slate-700 border border-slate-200/80 shadow-sm"
+              >
+                {trimmed}
+              </span>
+            );
+          })}
+        </div>
+      );
+    };
+
     return (
       <div className={`print-section ${marginClass}`}>
-        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
-          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Skills & Expertise
-        </h2>
-        <div className="space-y-2.5 text-xs">
-          {skills.map((skill) => (
-            <div key={skill.id} className="flex flex-col sm:flex-row sm:items-start gap-1">
-              <span className="font-bold text-gray-900 w-36 shrink-0 text-[11px]">{skill.category}:</span>
+        {renderSectionHeader("Skills & Expertise")}
+
+        <div className="space-y-2.5">
+          {skills.map((skill, idx) => (
+            <div key={skill.id || idx} className="editable-item-wrap group p-2 -m-2 flex items-start gap-2.5">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("skills", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={11} /></button>
+                  <button onClick={() => handleMoveListItem("skills", idx, "down")} disabled={idx === skills.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={11} /></button>
+                  <button onClick={() => handleDeleteListItem("skills", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={11} /></button>
+                </div>
+              )}
+
+              <div className="w-24 shrink-0 text-left font-bold text-gray-900 text-[10.5px] pt-1">
+                <EditableField
+                  value={skill.category}
+                  placeholder="Category"
+                  onSave={(val) => {
+                    const updated = skills.map((e, i) => i === idx ? { ...e, category: val } : e);
+                    onChange({ ...data, skills: updated });
+                  }}
+                  isPrintView={isPrintView}
+                  className="font-bold text-gray-900"
+                />
+              </div>
+
               <div className="flex-1">
-                {template === "classic" ? <span className="text-gray-700">{skill.items}</span> : renderSkillPills(skill.items)}
+                {isPrintView ? (
+                  renderSkillPills(skill.items, idx)
+                ) : (
+                  <EditableField
+                    value={skill.items}
+                    placeholder="Item 1, Item 2, Item 3"
+                    onSave={(val) => {
+                      const updated = skills.map((e, i) => i === idx ? { ...e, items: val } : e);
+                      onChange({ ...data, skills: updated });
+                    }}
+                    isPrintView={isPrintView}
+                    className="text-gray-700 text-xs w-full block"
+                  />
+                )}
               </div>
+
             </div>
           ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `skill-${Date.now()}`, category: "Category Title", items: "Skill A, Skill B, Skill C" };
+                onChange({ ...data, skills: [...skills, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Skill Set
+            </button>
+          )}
         </div>
       </div>
     );
   };
 
-  const renderCertificationsSection = () => {
-    if (!hasCertifications) return null;
+  const renderCertifications = () => {
+    if (disabledSections.includes("certifications")) return null;
+    if (certifications.length === 0 && isPrintView) return null;
+
     return (
       <div className={`print-section ${marginClass}`}>
-        <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-tight text-gray-800 uppercase text-xs mb-3 flex items-center gap-2 ${template === 'classic' ? 'border-b pb-1 mb-2.5' : ''}`} style={template === 'classic' ? primaryStyle : null}>
-          {template !== "classic" && <span className="w-1 h-3 rounded" style={bgAccentStyle} />} Certifications
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          {certifications.map((cert) => (
-            <div key={cert.id} className="flex justify-between text-gray-700 bg-gray-50/50 p-2 rounded border border-gray-100/80">
-              <div>
-                <span className="font-semibold text-gray-900">{cert.name}</span>
-                <span className="text-gray-500 block text-[10px]">{cert.issuer}</span>
+        {renderSectionHeader("Certifications")}
+
+        <div className="grid grid-cols-1 gap-2">
+          {certifications.map((cert, idx) => (
+            <div key={cert.id || idx} className="editable-item-wrap group p-2.5 border border-gray-100 bg-slate-50/50 rounded-lg relative flex justify-between items-start">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("certifications", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("certifications", idx, "down")} disabled={idx === certifications.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("certifications", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <div className="text-xs">
+                <span className="font-semibold text-gray-900 block">
+                  <EditableField
+                    value={cert.name}
+                    placeholder="AWS Solutions Architect"
+                    onSave={(val) => {
+                      const updated = certifications.map((e, i) => i === idx ? { ...e, name: val } : e);
+                      onChange({ ...data, certifications: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+                <span className="text-gray-500 block text-[9.5px] mt-0.5">
+                  <EditableField
+                    value={cert.issuer}
+                    placeholder="Amazon Web Services"
+                    onSave={(val) => {
+                      const updated = certifications.map((e, i) => i === idx ? { ...e, issuer: val } : e);
+                      onChange({ ...data, certifications: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
               </div>
-              <span className="text-gray-500 shrink-0 text-[10px] font-semibold">{cert.date}</span>
+
+              <span className="text-gray-400 text-[9.5px] font-semibold uppercase tracking-wider shrink-0 mt-0.5">
+                <EditableField
+                  value={cert.date}
+                  placeholder="2024-01"
+                  onSave={(val) => {
+                    const updated = certifications.map((e, i) => i === idx ? { ...e, date: val } : e);
+                    onChange({ ...data, certifications: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </span>
+
             </div>
           ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `cert-${Date.now()}`, name: "Certification Name", issuer: "Issuing Authority", date: "2024" };
+                onChange({ ...data, certifications: [...certifications, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Certification
+            </button>
+          )}
         </div>
       </div>
     );
   };
 
-  // Sections Dispatch Router
-  const renderSectionByOrder = (sectionName) => {
-    switch (sectionName) {
+  // ENHANCV-SPECIFIC SECTIONS
+  // ----------------------------------------------------
+
+  const renderStrengths = () => {
+    if (disabledSections.includes("strengths")) return null;
+    if (strengths.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Strengths")}
+
+        <div className="space-y-3">
+          {strengths.map((str, idx) => (
+            <div key={str.id || idx} className="editable-item-wrap group p-2 -m-2 relative">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("strengths", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("strengths", idx, "down")} disabled={idx === strengths.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("strengths", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <div className="text-xs">
+                <span className="font-extrabold text-gray-900 uppercase tracking-wide block">
+                  <EditableField
+                    value={str.name}
+                    placeholder="Problem Solving"
+                    onSave={(val) => {
+                      const updated = strengths.map((s, i) => i === idx ? { ...s, name: val } : s);
+                      onChange({ ...data, strengths: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+                <span className="text-gray-600 block text-[10px] leading-relaxed mt-0.5">
+                  <EditableField
+                    value={str.description}
+                    placeholder="Describe how this strength helps you deliver projects..."
+                    onSave={(val) => {
+                      const updated = strengths.map((s, i) => i === idx ? { ...s, description: val } : s);
+                      onChange({ ...data, strengths: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `str-${Date.now()}`, name: "New Strength", description: "Short description of strength/skill..." };
+                onChange({ ...data, strengths: [...strengths, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Strength
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderLanguages = () => {
+    if (disabledSections.includes("languages")) return null;
+    if (languages.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Languages")}
+
+        <div className="space-y-2.5">
+          {languages.map((lang, idx) => (
+            <div key={lang.id || idx} className="editable-item-wrap group p-2 -m-2 relative flex items-center justify-between">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("languages", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("languages", idx, "down")} disabled={idx === languages.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("languages", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <div className="text-xs">
+                <span className="font-bold text-gray-900 block">
+                  <EditableField
+                    value={lang.name}
+                    placeholder="Spanish"
+                    onSave={(val) => {
+                      const updated = languages.map((l, i) => i === idx ? { ...l, name: val } : l);
+                      onChange({ ...data, languages: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+                <span className="text-gray-500 block text-[9.5px] mt-0.5">
+                  <EditableField
+                    value={lang.level}
+                    placeholder="Full Professional Proficiency"
+                    onSave={(val) => {
+                      const updated = languages.map((l, i) => i === idx ? { ...l, level: val } : l);
+                      onChange({ ...data, languages: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+              {/* Visual Rating Indicator (Dots) */}
+              <div className="flex items-center gap-1 shrink-0 ml-4">
+                {[1, 2, 3, 4, 5].map((dot) => {
+                  const isActive = dot <= (lang.rating || 5);
+                  return (
+                    <button
+                      key={dot}
+                      onClick={() => {
+                        if (isPrintView) return;
+                        const updated = languages.map((l, i) => i === idx ? { ...l, rating: dot } : l);
+                        onChange({ ...data, languages: updated });
+                      }}
+                      className={`w-2.5 h-2.5 rounded-full transition-all shrink-0 ${
+                        isPrintView ? "pointer-events-none" : "cursor-pointer hover:scale-125"
+                      }`}
+                      style={{
+                        backgroundColor: isActive ? accentColor : "#e2e8f0"
+                      }}
+                    />
+                  );
+                })}
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `lang-${Date.now()}`, name: "New Language", level: "Proficiency Level", rating: 4 };
+                onChange({ ...data, languages: [...languages, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Language
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderAchievements = () => {
+    if (disabledSections.includes("achievements")) return null;
+    if (achievements.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Achievements")}
+
+        <div className="space-y-2">
+          {achievements.map((ach, idx) => (
+            <div key={ach.id || idx} className="editable-item-wrap group p-2 -m-2 relative flex items-start gap-2">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("achievements", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("achievements", idx, "down")} disabled={idx === achievements.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("achievements", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <span className="text-[12px] pt-0.5" style={accentStyle}>🏆</span>
+              <div className="flex-1 text-xs text-gray-700 leading-normal">
+                <EditableField
+                  value={ach.text}
+                  placeholder="Describe your award, key metric bump, or professional milestone..."
+                  onSave={(val) => {
+                    const updated = achievements.map((a, i) => i === idx ? { ...a, text: val } : a);
+                    onChange({ ...data, achievements: updated });
+                  }}
+                  isPrintView={isPrintView}
+                  className="font-medium text-gray-700"
+                />
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `ach-${Date.now()}`, text: "New professional milestone or award..." };
+                onChange({ ...data, achievements: [...achievements, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Achievement
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPassions = () => {
+    if (disabledSections.includes("passions")) return null;
+    if (passions.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Passions & Hobbies")}
+
+        <div className="space-y-3">
+          {passions.map((pass, idx) => (
+            <div key={pass.id || idx} className="editable-item-wrap group p-2 -m-2 relative">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("passions", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("passions", idx, "down")} disabled={idx === passions.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("passions", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <div className="text-xs">
+                <span className="font-bold text-gray-900 block">
+                  <EditableField
+                    value={pass.name}
+                    placeholder="Passionate Activity"
+                    onSave={(val) => {
+                      const updated = passions.map((p, i) => i === idx ? { ...p, name: val } : p);
+                      onChange({ ...data, passions: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+                <span className="text-gray-500 block text-[9.5px] leading-relaxed mt-0.5">
+                  <EditableField
+                    value={pass.description}
+                    placeholder="Short description of this interest/passion..."
+                    onSave={(val) => {
+                      const updated = passions.map((p, i) => i === idx ? { ...p, description: val } : p);
+                      onChange({ ...data, passions: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `pass-${Date.now()}`, name: "New Hobby / Passion", description: "Details of your interest..." };
+                onChange({ ...data, passions: [...passions, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Passion
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderBooks = () => {
+    if (disabledSections.includes("books")) return null;
+    if (books.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Books I Read")}
+
+        <div className="space-y-2">
+          {books.map((book, idx) => (
+            <div key={book.id || idx} className="editable-item-wrap group p-2 -m-2 relative flex items-center gap-1 text-xs">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("books", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("books", idx, "down")} disabled={idx === books.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("books", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <span className="text-[11px]" style={accentStyle}>📖</span>
+              <span className="font-bold text-gray-800 italic">
+                <EditableField
+                  value={book.title}
+                  placeholder="Book Title"
+                  onSave={(val) => {
+                    const updated = books.map((b, i) => i === idx ? { ...b, title: val } : b);
+                    onChange({ ...data, books: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </span>
+              <span className="text-gray-400 mx-1">by</span>
+              <span className="text-gray-500 font-medium">
+                <EditableField
+                  value={book.author}
+                  placeholder="Author Name"
+                  onSave={(val) => {
+                    const updated = books.map((b, i) => i === idx ? { ...b, author: val } : b);
+                    onChange({ ...data, books: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </span>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `book-${Date.now()}`, title: "Book Title", author: "Author" };
+                onChange({ ...data, books: [...books, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Book
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderQuotes = () => {
+    if (disabledSections.includes("quotes")) return null;
+    if (quotes.length === 0 && isPrintView) return null;
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("Favorite Quotes")}
+
+        <div className="space-y-3">
+          {quotes.map((q, idx) => (
+            <div key={q.id || idx} className="editable-item-wrap group p-2 -m-2 relative text-center">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button onClick={() => handleMoveListItem("quotes", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
+                  <button onClick={() => handleMoveListItem("quotes", idx, "down")} disabled={idx === quotes.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
+                  <button onClick={() => handleDeleteListItem("quotes", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+                </div>
+              )}
+
+              <div className="text-gray-700 text-xs italic leading-relaxed">
+                <span className="text-gray-300 font-serif text-lg leading-none mr-0.5">“</span>
+                <EditableField
+                  value={q.text}
+                  placeholder="Enter quote here..."
+                  onSave={(val) => {
+                    const updated = quotes.map((item, i) => i === idx ? { ...item, text: val } : item);
+                    onChange({ ...data, quotes: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+                <span className="text-gray-300 font-serif text-lg leading-none ml-0.5">”</span>
+              </div>
+              <div className="text-[10px] font-semibold text-gray-500 mt-1 uppercase tracking-wider">
+                <span className="mr-0.5">—</span>
+                <EditableField
+                  value={q.author}
+                  placeholder="Author"
+                  onSave={(val) => {
+                    const updated = quotes.map((item, i) => i === idx ? { ...item, author: val } : item);
+                    onChange({ ...data, quotes: updated });
+                  }}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `quote-${Date.now()}`, text: "Clean code always looks like it was written by someone who cares.", author: "Michael Feathers" };
+                onChange({ ...data, quotes: [...quotes, newItem] });
+              }}
+              className="w-full py-1 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Quote
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDayInLife = () => {
+    if (disabledSections.includes("dayInLife")) return null;
+    if (dayInLife.length === 0 && isPrintView) return null;
+
+    let accumulatedPercent = 0;
+    const radius = 38;
+    const circumference = 2 * Math.PI * radius; // ~238.76
+    const strokeWidth = 14;
+    const center = 50;
+
+    // Harmonized colors for Day in My Life chart
+    const chartColors = ["#4f46e5", "#10b981", "#f59e0b", "#f43f5e", "#8b5cf6", "#06b6d4"];
+
+    return (
+      <div className={`print-section ${marginClass}`}>
+        {renderSectionHeader("A Day in My Life")}
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50/50 p-3.5 rounded-xl border border-slate-100/80">
+          
+          {/* SVG Pie Ring Donut Chart */}
+          <div className="relative w-28 h-28 shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+              <circle cx={center} cy={center} r={radius} fill="transparent" stroke="#f1f5f9" strokeWidth={strokeWidth} />
+              {dayInLife.map((item, idx) => {
+                const percent = Math.min(Math.max(item.percentage || 0, 0), 100);
+                const strokeLength = (percent / 100) * circumference;
+                const offset = circumference - (accumulatedPercent / 100) * circumference;
+                accumulatedPercent += percent;
+                const color = chartColors[idx % chartColors.length];
+
+                return (
+                  <circle
+                    key={item.id || idx}
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="transparent"
+                    stroke={color}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={`${strokeLength} ${circumference}`}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    className="pie-segment"
+                  />
+                );
+              })}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span className="text-[9px] font-bold uppercase text-gray-400 tracking-wide leading-none">Time Spent</span>
+              <span className="text-[10px] font-black text-gray-700 uppercase mt-0.5 whitespace-nowrap">My Day</span>
+            </div>
+          </div>
+
+          {/* List items with inline edit capability */}
+          <div className="flex-1 space-y-1 w-full text-xs text-gray-600 font-medium">
+            {dayInLife.map((item, idx) => {
+              const color = chartColors[idx % chartColors.length];
+              return (
+                <div key={item.id || idx} className="flex items-center justify-between gap-2 group/dil text-[11px]">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                    <EditableField
+                      value={item.activity}
+                      placeholder="Coding, Meetings..."
+                      onSave={(val) => {
+                        const updated = dayInLife.map((d, i) => i === idx ? { ...d, activity: val } : d);
+                        onChange({ ...data, dayInLife: updated });
+                      }}
+                      isPrintView={isPrintView}
+                      className="truncate text-gray-700 font-semibold"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {!isPrintView ? (
+                      <input
+                        type="number"
+                        value={item.percentage}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          const updated = dayInLife.map((d, i) => i === idx ? { ...d, percentage: val } : d);
+                          onChange({ ...data, dayInLife: updated });
+                        }}
+                        className="w-8 bg-slate-100 text-center rounded text-[10px] font-bold text-gray-900 border-0 py-0.5 text-gray-950 font-mono"
+                        min="0"
+                        max="100"
+                      />
+                    ) : (
+                      <span className="font-bold text-gray-900">{item.percentage}</span>
+                    )}
+                    <span className="text-gray-400">%</span>
+                    
+                    {!isPrintView && (
+                      <button
+                        onClick={() => {
+                          const updated = dayInLife.filter((_, i) => i !== idx);
+                          onChange({ ...data, dayInLife: updated });
+                        }}
+                        className="text-red-400 hover:text-red-600 font-bold ml-1 text-xs opacity-0 group-hover/dil:opacity-100 transition-opacity"
+                        title="Delete"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {!isPrintView && dayInLife.length < 6 && (
+              <button
+                onClick={() => {
+                  const newItem = { id: `dil-${Date.now()}`, activity: "Coding & Design", percentage: 25 };
+                  onChange({ ...data, dayInLife: [...dayInLife, newItem] });
+                }}
+                className="text-[9.5px] font-bold text-indigo-500 hover:text-indigo-600 flex items-center gap-0.5 mt-2.5 cursor-pointer"
+              >
+                <Plus size={10} /> Add Activity
+              </button>
+            )}
+          </div>
+
+        </div>
+      </div>
+    );
+  };
+
+  const renderCustomSection = (sectionId) => {
+    if (disabledSections.includes(sectionId)) return null;
+    const custSec = customSections.find(c => c.id === sectionId);
+    if (!custSec) return null;
+    if (custSec.items.length === 0 && isPrintView) return null;
+
+    return (
+      <div key={sectionId} className={`print-section ${marginClass}`}>
+        <div className="flex justify-between items-baseline mb-2 group/sec">
+          {/* Section Title Inline Editable */}
+          <div className="flex items-center gap-2">
+            {renderSectionHeader(
+              <EditableField
+                value={custSec.title}
+                placeholder="Section Title"
+                onSave={(val) => {
+                  const updated = customSections.map(c => c.id === sectionId ? { ...c, title: val } : c);
+                  onChange({ ...data, customSections: updated });
+                }}
+                isPrintView={isPrintView}
+                className="font-bold"
+              />
+            )}
+            
+            {/* Trash button to delete entire custom section (Only in Editor) */}
+            {!isPrintView && (
+              <button
+                onClick={() => {
+                  if (confirm(`Delete the entire custom section "${custSec.title}"?`)) {
+                    const updatedCustoms = customSections.filter(c => c.id !== sectionId);
+                    const updatedLeft = (layoutSettings.leftColumnSections || []).filter(id => id !== sectionId);
+                    const updatedRight = (layoutSettings.rightColumnSections || []).filter(id => id !== sectionId);
+                    const updatedOrder = (layoutSettings.sectionOrder || []).filter(id => id !== sectionId);
+
+                    onChange({
+                      ...data,
+                      customSections: updatedCustoms,
+                      layoutSettings: {
+                        ...data.layoutSettings,
+                        leftColumnSections: updatedLeft,
+                        rightColumnSections: updatedRight,
+                        sectionOrder: updatedOrder
+                      }
+                    });
+                  }
+                }}
+                className="text-red-400 hover:text-red-600 hover:bg-slate-100 p-1 rounded opacity-0 group-hover/sec:opacity-100 transition-opacity no-print"
+                title="Delete Section"
+              >
+                <Trash2 size={11} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {custSec.items.map((item, idx) => (
+            <div key={item.id || idx} className="editable-item-wrap group p-2 -m-2 relative">
+              
+              {!isPrintView && (
+                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
+                  <button
+                    onClick={() => {
+                      if (idx === 0) return;
+                      const updatedItems = [...custSec.items];
+                      const temp = updatedItems[idx];
+                      updatedItems[idx] = updatedItems[idx - 1];
+                      updatedItems[idx - 1] = temp;
+                      const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                      onChange({ ...data, customSections: updatedCustoms });
+                    }}
+                    disabled={idx === 0}
+                    className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                  >
+                    <ArrowUp size={10} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (idx === custSec.items.length - 1) return;
+                      const updatedItems = [...custSec.items];
+                      const temp = updatedItems[idx];
+                      updatedItems[idx] = updatedItems[idx + 1];
+                      updatedItems[idx + 1] = temp;
+                      const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                      onChange({ ...data, customSections: updatedCustoms });
+                    }}
+                    disabled={idx === custSec.items.length - 1}
+                    className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                  >
+                    <ArrowDown size={10} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const updatedItems = custSec.items.filter((_, i) => i !== idx);
+                      const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                      onChange({ ...data, customSections: updatedCustoms });
+                    }}
+                    className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
+                <span>
+                  <EditableField
+                    value={item.title}
+                    placeholder="Entry Title"
+                    onSave={(val) => {
+                      const updatedItems = custSec.items.map((it, i) => i === idx ? { ...it, title: val } : it);
+                      const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                      onChange({ ...data, customSections: updatedCustoms });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                  {item.subtitle && (
+                    <>
+                      <span className="font-normal text-gray-400 mx-1.5">|</span>
+                      <EditableField
+                        value={item.subtitle}
+                        placeholder="Subtitle"
+                        onSave={(val) => {
+                          const updatedItems = custSec.items.map((it, i) => i === idx ? { ...it, subtitle: val } : it);
+                          const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                          onChange({ ...data, customSections: updatedCustoms });
+                        }}
+                        isPrintView={isPrintView}
+                        className="font-medium text-gray-600"
+                      />
+                    </>
+                  )}
+                </span>
+                <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
+                  <EditableField
+                    value={item.date}
+                    placeholder="Date / Period"
+                    onSave={(val) => {
+                      const updatedItems = custSec.items.map((it, i) => i === idx ? { ...it, date: val } : it);
+                      const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                      onChange({ ...data, customSections: updatedCustoms });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </span>
+              </div>
+
+              <div className="text-gray-700 text-xs mt-1">
+                {isPrintView ? (
+                  <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
+                    {renderBulletPoints(item.description)}
+                  </ul>
+                ) : (
+                  <div className="pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors mt-0.5">
+                    <EditableField
+                      value={item.description}
+                      placeholder="• Entry description details..."
+                      onSave={(val) => {
+                        const updatedItems = custSec.items.map((it, i) => i === idx ? { ...it, description: val } : it);
+                        const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                        onChange({ ...data, customSections: updatedCustoms });
+                      }}
+                      isTextArea={true}
+                      isPrintView={isPrintView}
+                      className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                    />
+                  </div>
+                )}
+              </div>
+
+            </div>
+          ))}
+
+          {!isPrintView && (
+            <button
+              onClick={() => {
+                const newItem = { id: `citem-${Date.now()}`, title: "New Entry Title", subtitle: "Subtitle Details", date: "2024", description: "• Details..." };
+                const updatedItems = [...custSec.items, newItem];
+                const updatedCustoms = customSections.map(c => c.id === sectionId ? { ...c, items: updatedItems } : c);
+                onChange({ ...data, customSections: updatedCustoms });
+              }}
+              className="w-full py-1.5 border border-dashed border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-400 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus size={11} /> Add Entry
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const dispatchSection = (sectionId) => {
+    if (sectionId.startsWith("custom_")) {
+      return renderCustomSection(sectionId);
+    }
+
+    switch (sectionId) {
       case "summary":
-        return renderSummarySection();
+        return renderSummary();
       case "experience":
-        return renderExperienceSection();
+        return renderExperience();
       case "education":
-        return renderEducationSection();
+        return renderEducation();
       case "projects":
-        return renderProjectsSection();
+        return renderProjects();
       case "skills":
-        return renderSkillsSection();
+        return renderSkills();
       case "certifications":
-        return renderCertificationsSection();
+        return renderCertifications();
+      case "strengths":
+        return renderStrengths();
+      case "languages":
+        return renderLanguages();
+      case "achievements":
+        return renderAchievements();
+      case "passions":
+        return renderPassions();
+      case "books":
+        return renderBooks();
+      case "quotes":
+        return renderQuotes();
+      case "dayInLife":
+        return renderDayInLife();
       default:
         return null;
     }
   };
 
-  // LAYOUT SELECTORS
-  // ----------------------------------------------------
-  
-  // TEMPLATE 1: Harvard Classic (Center Aligned, Serif, Initials Badge)
-  const renderClassic = () => {
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
-        {/* Header */}
-        <div className="text-center mb-4 flex flex-col items-center">
-          
-          {/* Centered Initials Badge */}
-          <div className="mb-2">
-            {renderInitialsBadge("w-14 h-14 text-sm")}
-          </div>
-
-          <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-wide text-gray-900 mb-1`} style={primaryStyle}>
-            {personalInfo.firstName} {personalInfo.lastName}
-          </h1>
-          <p className="text-gray-600 font-bold tracking-wider uppercase text-xs">
-            {personalInfo.title}
-          </p>
-
-          <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-[11px] text-gray-500 mt-2 font-medium">
-            {personalInfo.location && <span>{personalInfo.location}</span>}
-            {personalInfo.phone && <span>• {personalInfo.phone}</span>}
-            {personalInfo.email && <span>• {personalInfo.email}</span>}
-            {personalInfo.website && (
-              <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline">
-                • {personalInfo.website.replace(/^https?:\/\//, "")}
-              </a>
-            )}
-            {personalInfo.linkedin && (
-              <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">
-                • {personalInfo.linkedin.replace(/^linkedin\.com\/in\//, "")}
-              </a>
-            )}
-            {personalInfo.github && (
-              <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline">
-                • {personalInfo.github.replace(/^github\.com\//, "")}
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Dynamic section ordering loop */}
-        <div className="space-y-1">
-          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
-        </div>
-      </div>
-    );
-  };
-
-  // TEMPLATE 2: Sleek Modern (Badge left, timeline nodes, styled pills)
-  const renderModern = () => {
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
-        {/* Header bar */}
-        <div className="flex justify-between items-center border-b-2 pb-4 mb-4" style={borderPrimaryStyle}>
-          <div className="flex items-center gap-3.5">
-            {renderInitialsBadge("w-14 h-14 text-sm")}
-            <div>
-              <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} text-gray-900 tracking-tight leading-none`} style={primaryStyle}>
-                {personalInfo.firstName} {personalInfo.lastName}
-              </h1>
-              <p className="text-xs font-bold tracking-wide mt-1" style={accentStyle}>
-                {personalInfo.title}
-              </p>
-            </div>
-          </div>
-
-          <div className="text-right text-[10px] text-gray-500 space-y-0.5 font-medium">
-            {personalInfo.location && <div>{personalInfo.location}</div>}
-            {personalInfo.phone && <div>{personalInfo.phone}</div>}
-            {personalInfo.email && <div className="font-semibold" style={accentStyle}>{personalInfo.email}</div>}
-            
-            <div className="flex gap-2 justify-end mt-1 text-[9px] uppercase font-bold text-gray-400">
-              {personalInfo.website && <a href={personalInfo.website} target="_blank" rel="noreferrer" className="hover:underline">Web</a>}
-              {personalInfo.linkedin && <a href={`https://${personalInfo.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">LinkedIn</a>}
-              {personalInfo.github && <a href={`https://${personalInfo.github}`} target="_blank" rel="noreferrer" className="hover:underline">GitHub</a>}
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic ordering loop */}
-        <div className="space-y-1">
-          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
-        </div>
-      </div>
-    );
-  };
-
-  // TEMPLATE 3: Minimalist Accent (Simple typography, timeline lines)
-  const renderMinimal = () => {
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} flex flex-col`}>
-        <div className="mb-5 flex justify-between items-start">
-          <div>
-            <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight text-gray-900 leading-none`} style={primaryStyle}>
-              {personalInfo.firstName} {personalInfo.lastName}
-            </h1>
-            <p className="text-[10px] uppercase font-extrabold tracking-widest mt-1.5" style={accentStyle}>
-              {personalInfo.title}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-0.5 items-end text-[10px] text-gray-500 font-semibold">
-            {personalInfo.email && <span>{personalInfo.email}</span>}
-            {personalInfo.phone && <span>{personalInfo.phone}</span>}
-            {personalInfo.location && <span>{personalInfo.location}</span>}
-          </div>
-        </div>
-
-        {/* Dynamic ordering loop */}
-        <div className="space-y-1">
-          {sectionOrder.map((sectionName) => renderSectionByOrder(sectionName))}
-        </div>
-      </div>
-    );
-  };
-
-  // TEMPLATE 4: Creative Split Column (2-Column Grid with full sidebar)
-  const renderCreative = () => {
-    // Collect settings specifically for sidebar coloring
-    const sidebarStyle = {
-      backgroundColor: primaryColor,
-    };
-
-    return (
-      <div className={`h-full ${fontConfig.bodyClass} ${sizeConfig.body} flex flex-row min-h-full items-stretch`}>
-        
-        {/* Left Column (Colored Sidebar) */}
-        <div className="w-1/3 text-white p-6 flex flex-col shrink-0" style={sidebarStyle}>
-          
-          {/* Sidebar Header Badge */}
-          <div className="flex flex-col items-center mb-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-extrabold text-white text-sm mb-3">
-              {personalInfo.firstName?.[0] || ""}{personalInfo.lastName?.[0] || ""}
-            </div>
-            <h1 className={`${fontConfig.headingClass} text-lg tracking-tight leading-tight`}>
-              {personalInfo.firstName}<br/>{personalInfo.lastName}
-            </h1>
-            <p className="text-[10px] opacity-80 uppercase tracking-widest font-semibold mt-1">
-              {personalInfo.title}
-            </p>
-          </div>
-
-          {/* Contact details */}
-          <div className="mb-6 space-y-2 text-[10px]">
-            <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1 mb-2">
-              Contact Details
-            </h3>
-            {personalInfo.location && <div>{personalInfo.location}</div>}
-            {personalInfo.phone && <div>{personalInfo.phone}</div>}
-            {personalInfo.email && <div className="break-all">{personalInfo.email}</div>}
-            {personalInfo.website && <div className="break-all opacity-80">{personalInfo.website.replace(/^https?:\/\//, "")}</div>}
-            {personalInfo.linkedin && <div className="break-all opacity-80">{personalInfo.linkedin.replace(/^linkedin\.com\/in\//, "")}</div>}
-            {personalInfo.github && <div className="break-all opacity-80">{personalInfo.github.replace(/^github\.com\//, "")}</div>}
-          </div>
-
-          {/* Skills (Rendered inside sidebar as visual light text list) */}
-          {hasSkills && (
-            <div className="space-y-3 text-[10px]">
-              <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1">
-                Expertise
-              </h3>
-              {skills.map((skill) => (
-                <div key={skill.id} className="space-y-1">
-                  <span className="font-bold opacity-90 block">{skill.category}</span>
-                  <div className="flex flex-wrap gap-1">
-                    {skill.items.split(",").map((s, i) => (
-                      <span key={i} className="bg-white/10 border border-white/10 px-1.5 py-0.5 rounded text-[9px] font-medium block">
-                        {s.trim()}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Certifications (Sidebar layout) */}
-          {hasCertifications && (
-            <div className="mt-6 space-y-3 text-[10px]">
-              <h3 className="text-[11px] font-bold uppercase tracking-widest border-b border-white/20 pb-1">
-                Certifications
-              </h3>
-              {certifications.map((cert) => (
-                <div key={cert.id} className="space-y-0.5">
-                  <span className="font-semibold block leading-tight">{cert.name}</span>
-                  <span className="opacity-75 block text-[9px]">{cert.issuer} • {cert.date}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Right Column (Main content in white background) */}
-        <div className={`w-2/3 ${paddingClass} flex flex-col bg-white text-gray-800`}>
-          {/* Render right-side sections by ordering (skipping skills/certifications if they exist in sidebar) */}
-          <div className="space-y-1">
-            {sectionOrder.map((sectionName) => {
-              if (sectionName === "skills" || sectionName === "certifications") return null;
-              return renderSectionByOrder(sectionName);
-            })}
-          </div>
-        </div>
-
-      </div>
-    );
-  };
-
-  const selectTemplate = () => {
-    switch (template) {
-      case "classic":
-        return renderClassic();
-      case "modern":
-        return renderModern();
-      case "minimal":
-        return renderMinimal();
-      case "creative":
-        return renderCreative();
+  // COLUMN LAYOUT WIDTHS
+  const getColumnWidths = () => {
+    switch (columnRatio) {
+      case "50-50":
+        return { left: "w-1/2", right: "w-1/2" };
+      case "70-30":
+        return { left: "w-[70%]", right: "w-[30%]" };
+      case "60-40":
       default:
-        return renderModern();
+        return { left: "w-[60%]", right: "w-[40%]" };
     }
   };
 
+  const colWidths = getColumnWidths();
+
   return (
     <div 
-      id="resume-preview-root" 
-      className={`resume-preview-sheet ${isPrintView ? 'print-area' : ''}`}
-      style={{ minHeight: isPrintView ? 'auto' : '297mm' }}
+      id="resume-preview-root"
+      className={`resume-preview-sheet ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} ${leadingClass} flex flex-col bg-white text-gray-800 ${
+        isPrintView ? 'print-area' : ''
+      }`}
     >
-      {selectTemplate()}
+      
+      {/* 1. HEADER SECTION (Always Full Width) */}
+      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 mb-4 border-b-2" style={borderPrimaryStyle}>
+        
+        {/* Left Side: Name and Professional Title */}
+        <div className="flex-1 space-y-1">
+          <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}>
+            <EditableField
+              value={personalInfo.firstName}
+              placeholder="First Name"
+              onSave={(val) => handlePersonalChange("firstName", val)}
+              isPrintView={isPrintView}
+              className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
+            />
+            <span className="mx-1"></span>
+            <EditableField
+              value={personalInfo.lastName}
+              placeholder="Last Name"
+              onSave={(val) => handlePersonalChange("lastName", val)}
+              isPrintView={isPrintView}
+              className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
+            />
+          </h1>
+          
+          <div className="text-[12px] font-bold tracking-wider uppercase mt-1.5" style={accentStyle}>
+            <EditableField
+              value={personalInfo.title}
+              placeholder="Professional Title"
+              onSave={(val) => handlePersonalChange("title", val)}
+              isPrintView={isPrintView}
+              className="font-bold text-[12px]"
+            />
+          </div>
+        </div>
+
+        {/* Right Side: Contact Info Grid (Sleek grid) */}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10.5px] text-gray-600 font-semibold shrink-0">
+          {/* Email */}
+          <div className="flex items-center gap-1.5">
+            <Mail size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.email}
+              placeholder="email@example.com"
+              onSave={(val) => handlePersonalChange("email", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+
+          {/* Phone */}
+          <div className="flex items-center gap-1.5">
+            <Phone size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.phone}
+              placeholder="+1 (555) 012-3456"
+              onSave={(val) => handlePersonalChange("phone", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-1.5">
+            <MapPin size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.location}
+              placeholder="City, State"
+              onSave={(val) => handlePersonalChange("location", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+
+          {/* Website */}
+          <div className="flex items-center gap-1.5">
+            <Globe size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.website}
+              placeholder="website.com"
+              onSave={(val) => handlePersonalChange("website", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+
+          {/* LinkedIn */}
+          <div className="flex items-center gap-1.5">
+            <Linkedin size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.linkedin}
+              placeholder="linkedin.com/in/user"
+              onSave={(val) => handlePersonalChange("linkedin", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+
+          {/* GitHub */}
+          <div className="flex items-center gap-1.5">
+            <Github size={11} className="text-gray-400" />
+            <EditableField
+              value={personalInfo.github}
+              placeholder="github.com/user"
+              onSave={(val) => handlePersonalChange("github", val)}
+              isPrintView={isPrintView}
+            />
+          </div>
+        </div>
+
+      </header>
+
+      {/* 2. BODY CONTENT (Modular Columns or Single Column vertical list) */}
+      <div className="flex-1 flex flex-col justify-start">
+        {layoutStyle === "double" ? (
+          /* DUAL COLUMN STRUCTURE */
+          <div className="flex gap-6 items-stretch w-full flex-1">
+            {/* Column 1 (Left Column) */}
+            <div className={`${colWidths.left} flex flex-col gap-1.5`}>
+              {leftColumnSections.map((secId) => dispatchSection(secId))}
+            </div>
+            
+            {/* Split divider lines depending on template style */}
+            <div className="w-px bg-slate-200/80 shrink-0 self-stretch no-print" />
+
+            {/* Column 2 (Right Column) */}
+            <div className={`${colWidths.right} flex flex-col gap-1.5`}>
+              {rightColumnSections.map((secId) => dispatchSection(secId))}
+            </div>
+          </div>
+        ) : (
+          /* SINGLE COLUMN STRUCTURE */
+          <div className="space-y-2.5">
+            {sectionOrder.map((secId) => dispatchSection(secId))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

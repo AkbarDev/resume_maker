@@ -245,7 +245,7 @@ export default function App() {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Left Column: Form Editor */}
-        <main className="no-print w-[33%] border-r border-dark-border bg-dark-card/50 overflow-y-auto p-5 shrink-0">
+        <main className="no-print w-[24%] border-r border-dark-border bg-dark-card/50 overflow-y-auto p-5 shrink-0">
           <ResumeEditor 
             data={activeResume} 
             onChange={handleResumeChange} 
@@ -261,7 +261,12 @@ export default function App() {
           </div>
           
           <div className="w-[210mm] max-w-full shadow-2xl shadow-black/40 border border-slate-800/50 rounded-lg overflow-hidden shrink-0">
-            <ResumePreview data={activeResume} isPrintView={false} />
+            <ResumePreview 
+              data={activeResume} 
+              onChange={handleResumeChange}
+              onAIEnhance={handleAIEnhanceRequest}
+              isPrintView={false} 
+            />
           </div>
           
           <div className="mt-8 text-center text-[11px] text-gray-500 flex items-center gap-1.5 justify-center">
@@ -286,7 +291,12 @@ export default function App() {
 
       {/* Hidden Print Target */}
       <div className="hidden print:block print-area">
-        <ResumePreview data={activeResume} isPrintView={true} />
+        <ResumePreview 
+          data={activeResume} 
+          onChange={handleResumeChange}
+          onAIEnhance={handleAIEnhanceRequest}
+          isPrintView={true} 
+        />
       </div>
 
     </div>
