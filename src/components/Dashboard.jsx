@@ -512,7 +512,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
                 onClick={() => setActiveCategory(cat)}
                 className={`px-3 py-1.5 rounded-full font-semibold border transition-all cursor-pointer ${
                   activeCategory === cat
-                    ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-600/10"
+                    ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 shadow-sm"
                     : "border-dark-border bg-slate-900/30 text-gray-400 hover:text-white"
                 }`}
               >
@@ -530,7 +530,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
               >
                 <div>
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-slate-800 text-indigo-400 border border-dark-border">
+                    <span className="text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-indigo-600/10 text-indigo-400 border border-indigo-500/20">
                       {tpl.category}
                     </span>
                     
