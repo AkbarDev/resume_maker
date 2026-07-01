@@ -307,19 +307,56 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
             </div>
 
             {/* 4. Font Style Dropdown Selector */}
-            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+            {/* 4. Font Style Selector List */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-3">
               <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Font Style</h3>
-              <select
-                value={data.layoutSettings?.fontFamily || "sans"}
-                onChange={(e) => handleLayoutChange("fontFamily", e.target.value)}
-                className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
+              
+              {/* Vertical Scrollable Font List */}
+              <div className="max-h-[320px] overflow-y-auto border border-dark-border bg-slate-950/50 rounded-xl p-2.5 flex flex-col gap-1 text-slate-200">
+                {Object.entries(FONTS).map(([key, val]) => {
+                  const isSelected = (data.layoutSettings?.fontFamily || "sans") === key;
+                  
+                  // Extract family name and description
+                  const parts = val.label.split(" / ");
+                  const name = parts[0];
+                  const desc = parts[1];
+
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleLayoutChange("fontFamily", key)}
+                      style={val.style}
+                      className={`w-full py-2.5 px-3 rounded-lg text-left transition-all flex items-center justify-between cursor-pointer group ${
+                        isSelected 
+                          ? "bg-emerald-500/10 text-emerald-400 font-extrabold" 
+                          : "hover:bg-slate-900/80 hover:text-slate-100 font-medium"
+                      }`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm tracking-wide">{name}</span>
+                        {desc && (
+                          <span className="text-[9px] text-slate-400 group-hover:text-slate-300 italic font-sans font-normal mt-0.5">
+                            {desc}
+                          </span>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <span className="text-emerald-400 text-sm font-bold">✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Save Font Button */}
+              <button
+                onClick={() => {
+                  alert(`Font configuration saved successfully!`);
+                }}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs tracking-wider uppercase shadow-md transition-all hover:scale-102 cursor-pointer text-center"
               >
-                {Object.entries(FONTS).map(([key, val]) => (
-                  <option key={key} value={key} className="bg-slate-900 text-white font-medium">
-                    {val.label}
-                  </option>
-                ))}
-              </select>
+                Save Font
+              </button>
             </div>
 
             {/* 5. Font Size Slider */}

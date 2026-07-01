@@ -122,35 +122,77 @@ export const COLOR_PRESETS = [
 ];
 
 export const FONTS = {
-  sans: {
-    label: "Outfit / Inter",
-    headingClass: "font-outfit font-bold",
-    bodyClass: "font-inter"
+  rubik: {
+    label: "Rubik",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Rubik', sans-serif" }
+  },
+  arimo: {
+    label: "Arimo / Arial-like font",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Arimo', sans-serif" }
   },
   lato: {
-    label: "Lato / Open Sans",
-    headingClass: "font-lato font-bold",
-    bodyClass: "font-lato"
+    label: "Lato",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Lato', sans-serif" }
+  },
+  raleway: {
+    label: "Raleway",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Raleway', sans-serif" }
+  },
+  bitter: {
+    label: "Bitter",
+    headingClass: "font-serif",
+    bodyClass: "font-serif",
+    style: { fontFamily: "'Bitter', serif" }
+  },
+  exo2: {
+    label: "Exo 2",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Exo 2', sans-serif" }
+  },
+  chivo: {
+    label: "Chivo",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Chivo', sans-serif" }
+  },
+  tinos: {
+    label: "Tinos / Times New Roman-like font",
+    headingClass: "font-serif",
+    bodyClass: "font-serif",
+    style: { fontFamily: "'Tinos', serif" }
   },
   montserrat: {
-    label: "Montserrat / Raleway",
-    headingClass: "font-montserrat font-extrabold",
-    bodyClass: "font-montserrat"
+    label: "Montserrat",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Montserrat', sans-serif" }
   },
-  lora: {
-    label: "Lora / Roboto",
-    headingClass: "font-lora font-bold",
-    bodyClass: "font-lora"
+  oswald: {
+    label: "Oswald",
+    headingClass: "font-sans",
+    bodyClass: "font-sans",
+    style: { fontFamily: "'Oswald', sans-serif" }
   },
-  serif: {
-    label: "Playfair / Georgia",
-    headingClass: "font-playfair font-bold",
-    bodyClass: "font-serif"
+  volkhov: {
+    label: "Volkhov",
+    headingClass: "font-serif",
+    bodyClass: "font-serif",
+    style: { fontFamily: "'Volkhov', serif" }
   },
-  mono: {
-    label: "Fira Code / Mono",
-    headingClass: "font-mono font-bold",
-    bodyClass: "font-mono text-sm"
+  gelasio: {
+    label: "Gelasio / Georgia-like font",
+    headingClass: "font-serif",
+    bodyClass: "font-serif",
+    style: { fontFamily: "'Gelasio', serif" }
   }
 };
 
