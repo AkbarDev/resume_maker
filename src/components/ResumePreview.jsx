@@ -146,8 +146,26 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
   } = layoutSettings;
 
+  // Simple Toggle Switch
+  const ToggleSwitch = ({ checked, onChange }) => (
+    <button 
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange(!checked);
+      }}
+      className={`w-8 h-4 rounded-full relative transition-colors cursor-pointer shrink-0 ${
+        checked ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+      }`}
+    >
+      <span className={`w-3.5 h-3.5 rounded-full bg-white absolute top-[1px] left-[1px] transition-transform shadow-sm transform ${
+        checked ? "translate-x-4" : "translate-x-0"
+      }`} />
+    </button>
+  );
+
   // Helper to wrap items with click-to-edit box, green outline, and floating toolbar controls
-  const EditorItemBox = ({ id, type, index, itemsArray = [], onAdd, onDelete, children }) => {
+  const EditorItemBox = ({ id, type, index, itemsArray = [], onAdd, onDelete, toggles = [], children }) => {
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     if (isPrintView) return children;
     const isFocused = focusedItemId === id;
     
@@ -164,63 +182,89 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
         }`}
       >
         {isFocused && (
-          <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-full px-3 py-1 shadow-lg flex items-center gap-3 text-xs z-30 no-print">
-            {onAdd && (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAdd();
-                }}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-0.5 cursor-pointer transition-colors text-[10px]"
-              >
-                <Plus size={10} /> Entry
-              </button>
-            )}
-            {onAdd && <div className="w-px h-3 bg-slate-200 dark:bg-slate-700" />}
-            
-            {/* Reordering handles */}
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                if (index > 0) handleMoveListItem(type, index, "up"); 
-              }} 
-              disabled={index === 0}
-              className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5"
-              title="Move Up"
-            >
-              <ArrowUp size={11} />
-            </button>
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                if (index < itemsArray.length - 1) handleMoveListItem(type, index, "down"); 
-              }} 
-              disabled={index === itemsArray.length - 1}
-              className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5"
-              title="Move Down"
-            >
-              <ArrowDown size={11} />
-            </button>
-            
-            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 font-serif font-bold text-[10px] p-0.5">T</button>
-            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 p-0.5"><Calendar size={12} /></button>
-            
-            {onDelete && (
+          <>
+            <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-full px-3 py-1 shadow-lg flex items-center gap-3 text-xs z-30 no-print">
+              {onAdd && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAdd();
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-0.5 cursor-pointer transition-colors text-[10px]"
+                >
+                  <Plus size={10} /> Entry
+                </button>
+              )}
+              {onAdd && <div className="w-px h-3 bg-slate-200 dark:bg-slate-700" />}
+              
+              {/* Reordering handles */}
               <button 
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  onDelete(); 
-                  setFocusedItemId(null); 
+                  if (index > 0) handleMoveListItem(type, index, "up"); 
                 }} 
-                className="text-red-400 hover:text-red-500 p-0.5"
-                title="Delete Entry"
+                disabled={index === 0}
+                className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5 cursor-pointer"
+                title="Move Up"
               >
-                <Trash2 size={12} />
+                <ArrowUp size={11} />
               </button>
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  if (index < itemsArray.length - 1) handleMoveListItem(type, index, "down"); 
+                }} 
+                disabled={index === itemsArray.length - 1}
+                className="text-slate-500 hover:text-indigo-500 disabled:opacity-20 p-0.5 cursor-pointer"
+                title="Move Down"
+              >
+                <ArrowDown size={11} />
+              </button>
+              
+              <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 font-serif font-bold text-[10px] p-0.5 cursor-pointer">T</button>
+              <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 p-0.5 cursor-pointer"><Calendar size={12} /></button>
+              
+              {onDelete && (
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    onDelete(); 
+                    setFocusedItemId(null); 
+                  }} 
+                  className="text-red-400 hover:text-red-500 p-0.5 cursor-pointer"
+                  title="Delete Entry"
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
+              
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setIsSettingsOpen(!isSettingsOpen); 
+                }} 
+                className={`p-0.5 rounded cursor-pointer transition-colors ${isSettingsOpen ? "text-emerald-500" : "text-slate-500 hover:text-indigo-500"}`}
+                title="Toggle fields settings"
+              >
+                <Settings size={12} />
+              </button>
+            </div>
+
+            {/* Visibility Toggles Dropdown Popup */}
+            {isSettingsOpen && toggles.length > 0 && (
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="absolute top-9 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xl z-40 text-slate-800 dark:text-slate-200 min-w-[180px] flex flex-col gap-3 no-print"
+              >
+                {toggles.map((t, i) => (
+                  <div key={i} className="flex items-center justify-between gap-6 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                    <span>{t.label}</span>
+                    <ToggleSwitch checked={t.checked} onChange={t.onChange} />
+                  </div>
+                ))}
+              </div>
             )}
-            
-            <button onClick={(e) => { e.stopPropagation(); }} className="text-slate-500 hover:text-indigo-500 p-0.5"><Settings size={12} /></button>
-          </div>
+          </>
         )}
         {children}
       </div>
@@ -409,88 +453,120 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 setFocusedItemId(newItem.id);
               }}
               onDelete={() => handleDeleteListItem("experience", idx)}
+              toggles={[
+                { label: "Title", checked: !exp.hideTitle, onChange: (val) => {
+                  const updated = experience.map((e, i) => i === idx ? { ...e, hideTitle: !val } : e);
+                  onChange({ ...data, experience: updated });
+                }},
+                { label: "Company Name", checked: !exp.hideCompany, onChange: (val) => {
+                  const updated = experience.map((e, i) => i === idx ? { ...e, hideCompany: !val } : e);
+                  onChange({ ...data, experience: updated });
+                }},
+                { label: "Description", checked: !exp.hideDescription, onChange: (val) => {
+                  const updated = experience.map((e, i) => i === idx ? { ...e, hideDescription: !val } : e);
+                  onChange({ ...data, experience: updated });
+                }},
+                { label: "Location", checked: !exp.hideLocation, onChange: (val) => {
+                  const updated = experience.map((e, i) => i === idx ? { ...e, hideLocation: !val } : e);
+                  onChange({ ...data, experience: updated });
+                }},
+                { label: "Date Period", checked: !exp.hideDate, onChange: (val) => {
+                  const updated = experience.map((e, i) => i === idx ? { ...e, hideDate: !val } : e);
+                  onChange({ ...data, experience: updated });
+                }}
+              ]}
             >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
-                  <EditableField
-                    value={exp.role}
-                    placeholder="Software Engineer"
-                    onSave={(val) => {
-                      const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
-                      onChange({ ...data, experience: updated });
-                    }}
-                    isPrintView={isPrintView}
-                    className="font-bold text-gray-900"
-                  />
-                  <span className="font-normal text-gray-400 mx-1.5">|</span>
-                  <EditableField
-                    value={exp.company}
-                    placeholder="Tech Corp"
-                    onSave={(val) => {
-                      const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
-                      onChange({ ...data, experience: updated });
-                    }}
-                    isPrintView={isPrintView}
-                    className="font-medium text-gray-600"
-                  />
-                </span>
-                <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase whitespace-nowrap" style={accentStyle}>
-                  <EditableField
-                    value={exp.startDate}
-                    placeholder="2022-01"
-                    onSave={(val) => {
-                      const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
-                      onChange({ ...data, experience: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                  <span className="mx-1">–</span>
-                  <EditableField
-                    value={exp.endDate}
-                    placeholder="Present"
-                    onSave={(val) => {
-                      const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
-                      onChange({ ...data, experience: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                </span>
-              </div>
-
-              <div className="text-gray-500 italic text-[10px] mb-1 font-medium">
-                <EditableField
-                  value={exp.location}
-                  placeholder="San Francisco, CA"
-                  onSave={(val) => {
-                    const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
-                    onChange({ ...data, experience: updated });
-                  }}
-                  isPrintView={isPrintView}
-                />
-              </div>
-
-              {/* Description Edit (clicking opens textarea to edit raw bullet list) */}
-              <div className="text-gray-700 text-xs">
-                {isPrintView ? (
-                  <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
-                    {renderBulletPoints(exp.description)}
-                  </ul>
-                ) : (
-                  <div className="mt-1 pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors">
+                  {!exp.hideTitle && (
                     <EditableField
-                      value={exp.description}
-                      placeholder="• List your achievements...\n• Use action verbs and percentages..."
+                      value={exp.role}
+                      placeholder="Software Engineer"
                       onSave={(val) => {
-                        const updated = experience.map((e, i) => i === idx ? { ...e, description: val } : e);
+                        const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
                         onChange({ ...data, experience: updated });
                       }}
-                      isTextArea={true}
                       isPrintView={isPrintView}
-                      className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                      className="font-bold text-gray-900"
                     />
-                  </div>
+                  )}
+                  {!exp.hideTitle && !exp.hideCompany && <span className="font-normal text-gray-400 mx-1.5">|</span>}
+                  {!exp.hideCompany && (
+                    <EditableField
+                      value={exp.company}
+                      placeholder="Tech Corp"
+                      onSave={(val) => {
+                        const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
+                        onChange({ ...data, experience: updated });
+                      }}
+                      isPrintView={isPrintView}
+                      className="font-medium text-gray-600"
+                    />
+                  )}
+                </span>
+                {!exp.hideDate && (
+                  <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase whitespace-nowrap" style={accentStyle}>
+                    <EditableField
+                      value={exp.startDate}
+                      placeholder="2022-01"
+                      onSave={(val) => {
+                        const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
+                        onChange({ ...data, experience: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                    <span className="mx-1">–</span>
+                    <EditableField
+                      value={exp.endDate}
+                      placeholder="Present"
+                      onSave={(val) => {
+                        const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
+                        onChange({ ...data, experience: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  </span>
                 )}
               </div>
+
+              {!exp.hideLocation && (
+                <div className="text-gray-500 italic text-[10px] mb-1 font-medium">
+                  <EditableField
+                    value={exp.location}
+                    placeholder="San Francisco, CA"
+                    onSave={(val) => {
+                      const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
+                      onChange({ ...data, experience: updated });
+                    }}
+                    isPrintView={isPrintView}
+                  />
+                </div>
+              )}
+
+              {/* Description Edit (clicking opens textarea to edit raw bullet list) */}
+              {!exp.hideDescription && (
+                <div className="text-gray-700 text-xs">
+                  {isPrintView ? (
+                    <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
+                      {renderBulletPoints(exp.description)}
+                    </ul>
+                  ) : (
+                    <div className="mt-1 pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors">
+                      <EditableField
+                        value={exp.description}
+                        placeholder="• List your achievements...\n• Use action verbs and percentages..."
+                        onSave={(val) => {
+                          const updated = experience.map((e, i) => i === idx ? { ...e, description: val } : e);
+                          onChange({ ...data, experience: updated });
+                        }}
+                        isTextArea={true}
+                        isPrintView={isPrintView}
+                        className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
             </EditorItemBox>
           ))}
@@ -533,19 +609,43 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 setFocusedItemId(newItem.id);
               }}
               onDelete={() => handleDeleteListItem("education", idx)}
+              toggles={[
+                { label: "Degree Title", checked: !edu.hideTitle, onChange: (val) => {
+                  const updated = education.map((e, i) => i === idx ? { ...e, hideTitle: !val } : e);
+                  onChange({ ...data, education: updated });
+                }},
+                { label: "Institution Name", checked: !edu.hideCompany, onChange: (val) => {
+                  const updated = education.map((e, i) => i === idx ? { ...e, hideCompany: !val } : e);
+                  onChange({ ...data, education: updated });
+                }},
+                { label: "Details/Description", checked: !edu.hideDescription, onChange: (val) => {
+                  const updated = education.map((e, i) => i === idx ? { ...e, hideDescription: !val } : e);
+                  onChange({ ...data, education: updated });
+                }},
+                { label: "Location", checked: !edu.hideLocation, onChange: (val) => {
+                  const updated = education.map((e, i) => i === idx ? { ...e, hideLocation: !val } : e);
+                  onChange({ ...data, education: updated });
+                }},
+                { label: "Date Period", checked: !edu.hideDate, onChange: (val) => {
+                  const updated = education.map((e, i) => i === idx ? { ...e, hideDate: !val } : e);
+                  onChange({ ...data, education: updated });
+                }}
+              ]}
             >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
-                  <EditableField
-                    value={edu.degree}
-                    placeholder="B.S. Computer Science"
-                    onSave={(val) => {
-                      const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
-                      onChange({ ...data, education: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                  {edu.fieldOfStudy && (
+                  {!edu.hideTitle && (
+                    <EditableField
+                      value={edu.degree}
+                      placeholder="B.S. Computer Science"
+                      onSave={(val) => {
+                        const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
+                        onChange({ ...data, education: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  )}
+                  {!edu.hideTitle && edu.fieldOfStudy && (
                     <>
                       <span className="font-normal text-gray-400 mx-1">in</span>
                       <EditableField
@@ -560,52 +660,62 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                     </>
                   )}
                 </span>
-                <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
+                {!edu.hideDate && (
+                  <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
+                    <EditableField
+                      value={edu.graduationDate}
+                      placeholder="2020-05"
+                      onSave={(val) => {
+                        const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
+                        onChange({ ...data, education: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  </span>
+                )}
+              </div>
+
+              {(!edu.hideCompany || !edu.hideLocation) && (
+                <div className="flex justify-between text-gray-600 italic text-[10px] font-medium">
+                  {!edu.hideCompany ? (
+                    <EditableField
+                      value={edu.institution}
+                      placeholder="University Name"
+                      onSave={(val) => {
+                        const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
+                        onChange({ ...data, education: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  ) : <span />}
+                  {!edu.hideLocation && (
+                    <EditableField
+                      value={edu.location}
+                      placeholder="Berkeley, CA"
+                      onSave={(val) => {
+                        const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
+                        onChange({ ...data, education: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  )}
+                </div>
+              )}
+
+              {!edu.hideDescription && (
+                <div className="text-gray-500 mt-1 text-[10.5px]">
                   <EditableField
-                    value={edu.graduationDate}
-                    placeholder="2020-05"
+                    value={edu.details}
+                    placeholder="GPA: 3.8/4.0. Core coursework..."
                     onSave={(val) => {
-                      const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
+                      const updated = education.map((e, i) => i === idx ? { ...e, details: val } : e);
                       onChange({ ...data, education: updated });
                     }}
                     isPrintView={isPrintView}
+                    className="w-full block leading-relaxed"
                   />
-                </span>
-              </div>
-
-              <div className="flex justify-between text-gray-600 italic text-[10px] font-medium">
-                <EditableField
-                  value={edu.institution}
-                  placeholder="University Name"
-                  onSave={(val) => {
-                    const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
-                    onChange({ ...data, education: updated });
-                  }}
-                  isPrintView={isPrintView}
-                />
-                <EditableField
-                  value={edu.location}
-                  placeholder="Berkeley, CA"
-                  onSave={(val) => {
-                    const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
-                    onChange({ ...data, education: updated });
-                  }}
-                  isPrintView={isPrintView}
-                />
-              </div>
-
-              <div className="text-gray-500 mt-1 text-[10.5px]">
-                <EditableField
-                  value={edu.details}
-                  placeholder="GPA: 3.8/4.0. Core coursework..."
-                  onSave={(val) => {
-                    const updated = education.map((e, i) => i === idx ? { ...e, details: val } : e);
-                    onChange({ ...data, education: updated });
-                  }}
-                  isPrintView={isPrintView}
-                  className="w-full block leading-relaxed"
-                />
-              </div>
+                </div>
+              )}
 
             </EditorItemBox>
           ))}
@@ -648,39 +758,61 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 setFocusedItemId(newItem.id);
               }}
               onDelete={() => handleDeleteListItem("projects", idx)}
+              toggles={[
+                { label: "Title", checked: !proj.hideTitle, onChange: (val) => {
+                  const updated = projects.map((e, i) => i === idx ? { ...e, hideTitle: !val } : e);
+                  onChange({ ...data, projects: updated });
+                }},
+                { label: "Tech Stack", checked: !proj.hideTech, onChange: (val) => {
+                  const updated = projects.map((e, i) => i === idx ? { ...e, hideTech: !val } : e);
+                  onChange({ ...data, projects: updated });
+                }},
+                { label: "Description", checked: !proj.hideDescription, onChange: (val) => {
+                  const updated = projects.map((e, i) => i === idx ? { ...e, hideDescription: !val } : e);
+                  onChange({ ...data, projects: updated });
+                }},
+                { label: "Link", checked: !proj.hideLink, onChange: (val) => {
+                  const updated = projects.map((e, i) => i === idx ? { ...e, hideLink: !val } : e);
+                  onChange({ ...data, projects: updated });
+                }}
+              ]}
             >
               <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
                 <span>
-                  <EditableField
-                    value={proj.title}
-                    placeholder="Project Name"
-                    onSave={(val) => {
-                      const updated = projects.map((e, i) => i === idx ? { ...e, title: val } : e);
-                      onChange({ ...data, projects: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                  {proj.link && (
+                  {!proj.hideTitle && (
+                    <EditableField
+                      value={proj.title}
+                      placeholder="Project Name"
+                      onSave={(val) => {
+                        const updated = projects.map((e, i) => i === idx ? { ...e, title: val } : e);
+                        onChange({ ...data, projects: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  )}
+                  {!proj.hideTitle && proj.link && (
                     <a href={proj.link} target="_blank" rel="noreferrer" className="inline-flex items-center ml-1 text-gray-400 hover:text-indigo-600 no-print">
                       <ExternalLink size={10} />
                     </a>
                   )}
                 </span>
-                <span className="text-[10px] font-normal text-gray-500 italic shrink-0">
-                  <EditableField
-                    value={proj.techStack}
-                    placeholder="React, Next.js, Node.js"
-                    onSave={(val) => {
-                      const updated = projects.map((e, i) => i === idx ? { ...e, techStack: val } : e);
-                      onChange({ ...data, projects: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                </span>
+                {!proj.hideTech && (
+                  <span className="text-[10px] font-normal text-gray-500 italic shrink-0">
+                    <EditableField
+                      value={proj.techStack}
+                      placeholder="React, Next.js, Node.js"
+                      onSave={(val) => {
+                        const updated = projects.map((e, i) => i === idx ? { ...e, techStack: val } : e);
+                        onChange({ ...data, projects: updated });
+                      }}
+                      isPrintView={isPrintView}
+                    />
+                  </span>
+                )}
               </div>
 
               {/* Editable link (visible only in editor) */}
-              {!isPrintView && (
+              {!proj.hideLink && !isPrintView && (
                 <div className="text-[9px] text-slate-400 mt-0.5">
                   <EditableField
                     value={proj.link}
@@ -693,27 +825,29 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 </div>
               )}
 
-              <div className="text-gray-700 text-xs mt-1">
-                {isPrintView ? (
-                  <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
-                    {renderBulletPoints(proj.description)}
-                  </ul>
-                ) : (
-                  <div className="pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors mt-0.5">
-                    <EditableField
-                      value={proj.description}
-                      placeholder="• Built a task manager...\n• Integrated stripe..."
-                      onSave={(val) => {
-                        const updated = projects.map((e, i) => i === idx ? { ...e, description: val } : e);
-                        onChange({ ...data, projects: updated });
-                      }}
-                      isTextArea={true}
-                      isPrintView={isPrintView}
-                      className="text-gray-700 leading-normal w-full block whitespace-pre-line"
-                    />
-                  </div>
-                )}
-              </div>
+              {!proj.hideDescription && (
+                <div className="text-gray-700 text-xs mt-1">
+                  {isPrintView ? (
+                    <ul className="list-disc pl-4 space-y-0.5 mt-1 text-gray-700">
+                      {renderBulletPoints(proj.description)}
+                    </ul>
+                  ) : (
+                    <div className="pl-4 border-l border-slate-100 hover:border-indigo-200 transition-colors mt-0.5">
+                      <EditableField
+                        value={proj.description}
+                        placeholder="• Built a task manager...\n• Integrated stripe..."
+                        onSave={(val) => {
+                          const updated = projects.map((e, i) => i === idx ? { ...e, description: val } : e);
+                          onChange({ ...data, projects: updated });
+                        }}
+                        isTextArea={true}
+                        isPrintView={isPrintView}
+                        className="text-gray-700 leading-normal w-full block whitespace-pre-line"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
             </EditorItemBox>
           ))}
