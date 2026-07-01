@@ -140,6 +140,11 @@
     page-break-inside: avoid;
     break-inside: avoid;
   }
+
+  .page-break-container {
+    page-break-after: always;
+    break-after: page;
+  }
   
   /* Reset colors to standard print friendly colors */
   * {

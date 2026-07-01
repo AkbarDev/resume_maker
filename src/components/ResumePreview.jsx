@@ -429,9 +429,10 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const renderExperience = () => {
+  const renderExperience = (pageNum = 1) => {
     if (disabledSections.includes("experience")) return null;
-    if (experience.length === 0 && isPrintView) return null;
+    const items = pageNum === 1 ? experience.slice(0, 3) : experience.slice(3);
+    if (items.length === 0) return null;
 
     return (
       <div className={`print-section ${marginClass}`}>
@@ -440,8 +441,10 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
         </div>
 
         <div className="space-y-4">
-          {experience.map((exp, idx) => (
-            <EditorItemBox 
+          {items.map((exp, subIdx) => {
+            const idx = pageNum === 1 ? subIdx : subIdx + 3;
+            return (
+              <EditorItemBox 
               key={exp.id || idx}
               id={exp.id || `exp-${idx}`}
               type="experience"
@@ -569,7 +572,8 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
               )}
 
             </EditorItemBox>
-          ))}
+          );
+          })}
 
           {!isPrintView && (
             <button
@@ -587,9 +591,11 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const renderEducation = () => {
+  const renderEducation = (pageNum = 1) => {
     if (disabledSections.includes("education")) return null;
-    if (education.length === 0 && isPrintView) return null;
+    const targetPage = experience.length > 2 ? 2 : 1;
+    if (pageNum !== targetPage) return null;
+    if (education.length === 0) return null;
 
     return (
       <div className={`print-section ${marginClass}`}>
@@ -736,9 +742,10 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const renderProjects = () => {
+  const renderProjects = (pageNum = 1) => {
     if (disabledSections.includes("projects")) return null;
-    if (projects.length === 0 && isPrintView) return null;
+    if (pageNum !== 2) return null;
+    if (projects.length === 0) return null;
 
     return (
       <div className={`print-section ${marginClass}`}>
@@ -868,9 +875,10 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const renderSkills = () => {
+  const renderSkills = (pageNum = 1) => {
     if (disabledSections.includes("skills")) return null;
-    if (skills.length === 0 && isPrintView) return null;
+    const items = pageNum === 1 ? skills.slice(0, 2) : skills.slice(2);
+    if (items.length === 0) return null;
 
     // Helper for rendering skills inside canvas
     const renderSkillPills = (itemsText, sectionIdx) => {
@@ -898,54 +906,57 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
         {renderSectionHeader("Skills & Expertise")}
 
         <div className="space-y-2.5">
-          {skills.map((skill, idx) => (
-            <EditorItemBox 
-              key={skill.id || idx}
-              id={skill.id || `skill-${idx}`}
-              type="skills"
-              index={idx}
-              itemsArray={skills}
-              onAdd={() => {
-                const newItem = { id: `skill-${Date.now()}`, category: "Category Title", items: "Skill A, Skill B, Skill C" };
-                onChange({ ...data, skills: [...skills, newItem] });
-                setFocusedItemId(newItem.id);
-              }}
-              onDelete={() => handleDeleteListItem("skills", idx)}
-            >
-              <div className="flex items-start gap-2.5 w-full">
-                <div className="w-24 shrink-0 text-left font-bold text-gray-900 text-[10.5px] pt-1">
-                  <EditableField
-                    value={skill.category}
-                    placeholder="Category"
-                    onSave={(val) => {
-                      const updated = skills.map((e, i) => i === idx ? { ...e, category: val } : e);
-                      onChange({ ...data, skills: updated });
-                    }}
-                    isPrintView={isPrintView}
-                    className="font-bold text-gray-900"
-                  />
-                </div>
-
-                <div className="flex-1">
-                  {isPrintView ? (
-                    renderSkillPills(skill.items, idx)
-                  ) : (
+          {items.map((skill, subIdx) => {
+            const idx = pageNum === 1 ? subIdx : subIdx + 2;
+            return (
+              <EditorItemBox 
+                key={skill.id || idx}
+                id={skill.id || `skill-${idx}`}
+                type="skills"
+                index={idx}
+                itemsArray={skills}
+                onAdd={() => {
+                  const newItem = { id: `skill-${Date.now()}`, category: "Category Title", items: "Skill A, Skill B, Skill C" };
+                  onChange({ ...data, skills: [...skills, newItem] });
+                  setFocusedItemId(newItem.id);
+                }}
+                onDelete={() => handleDeleteListItem("skills", idx)}
+              >
+                <div className="flex items-start gap-2.5 w-full">
+                  <div className="w-24 shrink-0 text-left font-bold text-gray-900 text-[10.5px] pt-1">
                     <EditableField
-                      value={skill.items}
-                      placeholder="Item 1, Item 2, Item 3"
+                      value={skill.category}
+                      placeholder="Category"
                       onSave={(val) => {
-                        const updated = skills.map((e, i) => i === idx ? { ...e, items: val } : e);
+                        const updated = skills.map((e, i) => i === idx ? { ...e, category: val } : e);
                         onChange({ ...data, skills: updated });
                       }}
                       isPrintView={isPrintView}
-                      className="text-gray-700 text-xs w-full block"
+                      className="font-bold text-gray-900"
                     />
-                  )}
-                </div>
-              </div>
+                  </div>
 
-            </EditorItemBox>
-          ))}
+                  <div className="flex-1">
+                    {isPrintView ? (
+                      renderSkillPills(skill.items, idx)
+                    ) : (
+                      <EditableField
+                        value={skill.items}
+                        placeholder="Item 1, Item 2, Item 3"
+                        onSave={(val) => {
+                          const updated = skills.map((e, i) => i === idx ? { ...e, items: val } : e);
+                          onChange({ ...data, skills: updated });
+                        }}
+                        isPrintView={isPrintView}
+                        className="text-gray-700 text-xs w-full block"
+                      />
+                    )}
+                  </div>
+                </div>
+
+              </EditorItemBox>
+            );
+          })}
 
           {!isPrintView && (
             <button
@@ -1106,76 +1117,85 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const renderLanguages = () => {
+  const renderLanguages = (pageNum = 1) => {
     if (disabledSections.includes("languages")) return null;
-    if (languages.length === 0 && isPrintView) return null;
+    const items = pageNum === 1 ? languages.slice(0, 2) : languages.slice(2);
+    if (items.length === 0) return null;
 
     return (
       <div className={`print-section ${marginClass}`}>
         {renderSectionHeader("Languages")}
 
         <div className="space-y-2.5">
-          {languages.map((lang, idx) => (
-            <div key={lang.id || idx} className="editable-item-wrap group p-2 -m-2 relative flex items-center justify-between">
-              
-              {!isPrintView && (
-                <div className="editable-item-controls absolute right-2 top-2 bg-slate-900/90 text-white rounded-lg border border-slate-700/80 px-1 py-0.5 shadow-lg flex items-center gap-1 text-[10px]">
-                  <button onClick={() => handleMoveListItem("languages", idx, "up")} disabled={idx === 0} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowUp size={10} /></button>
-                  <button onClick={() => handleMoveListItem("languages", idx, "down")} disabled={idx === languages.length - 1} className="p-0.5 hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"><ArrowDown size={10} /></button>
-                  <button onClick={() => handleDeleteListItem("languages", idx)} className="p-0.5 hover:bg-red-950 text-red-400 rounded cursor-pointer"><Trash2 size={10} /></button>
+          {items.map((lang, subIdx) => {
+            const idx = pageNum === 1 ? subIdx : subIdx + 2;
+            return (
+              <EditorItemBox 
+                key={lang.id || idx}
+                id={lang.id || `lang-${idx}`}
+                type="languages"
+                index={idx}
+                itemsArray={languages}
+                onAdd={() => {
+                  const newItem = { id: `lang-${Date.now()}`, name: "New Language", level: "Proficiency Level", rating: 4 };
+                  onChange({ ...data, languages: [...languages, newItem] });
+                  setFocusedItemId(newItem.id);
+                }}
+                onDelete={() => handleDeleteListItem("languages", idx)}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="text-xs">
+                    <span className="font-bold text-gray-900 block">
+                      <EditableField
+                        value={lang.name}
+                        placeholder="Spanish"
+                        onSave={(val) => {
+                          const updated = languages.map((l, i) => i === idx ? { ...l, name: val } : l);
+                          onChange({ ...data, languages: updated });
+                        }}
+                        isPrintView={isPrintView}
+                      />
+                    </span>
+                    <span className="text-gray-500 block text-[9.5px] mt-0.5">
+                      <EditableField
+                        value={lang.level}
+                        placeholder="Full Professional Proficiency"
+                        onSave={(val) => {
+                          const updated = languages.map((l, i) => i === idx ? { ...l, level: val } : l);
+                          onChange({ ...data, languages: updated });
+                        }}
+                        isPrintView={isPrintView}
+                      />
+                    </span>
+                  </div>
+
+                  {/* Visual Rating Indicator (Dots) */}
+                  <div className="flex items-center gap-1 shrink-0 ml-4">
+                    {[1, 2, 3, 4, 5].map((dot) => {
+                      const isActive = dot <= (lang.rating || 5);
+                      return (
+                        <button
+                          key={dot}
+                          onClick={() => {
+                            if (isPrintView) return;
+                            const updated = languages.map((l, i) => i === idx ? { ...l, rating: dot } : l);
+                            onChange({ ...data, languages: updated });
+                          }}
+                          className={`w-2.5 h-2.5 rounded-full transition-all shrink-0 ${
+                            isPrintView ? "pointer-events-none" : "cursor-pointer hover:scale-125"
+                          }`}
+                          style={{
+                            backgroundColor: isActive ? accentColor : "#e2e8f0"
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
 
-              <div className="text-xs">
-                <span className="font-bold text-gray-900 block">
-                  <EditableField
-                    value={lang.name}
-                    placeholder="Spanish"
-                    onSave={(val) => {
-                      const updated = languages.map((l, i) => i === idx ? { ...l, name: val } : l);
-                      onChange({ ...data, languages: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                </span>
-                <span className="text-gray-500 block text-[9.5px] mt-0.5">
-                  <EditableField
-                    value={lang.level}
-                    placeholder="Full Professional Proficiency"
-                    onSave={(val) => {
-                      const updated = languages.map((l, i) => i === idx ? { ...l, level: val } : l);
-                      onChange({ ...data, languages: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                </span>
-              </div>
-
-              {/* Visual Rating Indicator (Dots) */}
-              <div className="flex items-center gap-1 shrink-0 ml-4">
-                {[1, 2, 3, 4, 5].map((dot) => {
-                  const isActive = dot <= (lang.rating || 5);
-                  return (
-                    <button
-                      key={dot}
-                      onClick={() => {
-                        if (isPrintView) return;
-                        const updated = languages.map((l, i) => i === idx ? { ...l, rating: dot } : l);
-                        onChange({ ...data, languages: updated });
-                      }}
-                      className={`w-2.5 h-2.5 rounded-full transition-all shrink-0 ${
-                        isPrintView ? "pointer-events-none" : "cursor-pointer hover:scale-125"
-                      }`}
-                      style={{
-                        backgroundColor: isActive ? accentColor : "#e2e8f0"
-                      }}
-                    />
-                  );
-                })}
-              </div>
-
-            </div>
-          ))}
+              </EditorItemBox>
+            );
+          })}
 
           {!isPrintView && (
             <button
@@ -1757,38 +1777,40 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const dispatchSection = (sectionId) => {
+  const dispatchSection = (sectionId, pageNum = 1) => {
     if (sectionId.startsWith("custom_")) {
+      // Custom sections go to page 2 if pageNum === 2, else ignore
+      if (pageNum === 1) return null;
       return renderCustomSection(sectionId);
     }
 
     switch (sectionId) {
       case "summary":
-        return renderSummary();
+        return pageNum === 1 ? renderSummary() : null;
       case "experience":
-        return renderExperience();
+        return renderExperience(pageNum);
       case "education":
-        return renderEducation();
+        return renderEducation(pageNum);
       case "projects":
-        return renderProjects();
+        return renderProjects(pageNum);
       case "skills":
-        return renderSkills();
+        return renderSkills(pageNum);
       case "certifications":
-        return renderCertifications();
+        return pageNum === 1 ? renderCertifications() : null;
       case "strengths":
-        return renderStrengths();
+        return pageNum === 2 ? renderStrengths() : null;
       case "languages":
-        return renderLanguages();
+        return renderLanguages(pageNum);
       case "achievements":
-        return renderAchievements();
+        return pageNum === 2 ? renderAchievements() : null;
       case "passions":
-        return renderPassions();
+        return pageNum === 2 ? renderPassions() : null;
       case "books":
-        return renderBooks();
+        return pageNum === 2 ? renderBooks() : null;
       case "quotes":
-        return renderQuotes();
+        return pageNum === 2 ? renderQuotes() : null;
       case "dayInLife":
-        return renderDayInLife();
+        return pageNum === 2 ? renderDayInLife() : null;
       default:
         return null;
     }
@@ -1809,145 +1831,179 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
   const colWidths = getColumnWidths();
 
-  return (
-    <div 
-      id="resume-preview-root"
-      className={`resume-preview-sheet ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} ${leadingClass} flex flex-col bg-white text-gray-800 ${
-        isPrintView ? 'print-area' : ''
-      }`}
-    >
-      
-      {/* 1. HEADER SECTION (Always Full Width) */}
-      <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 mb-4 border-b-2" style={borderPrimaryStyle}>
-        
-        {/* Left Side: Name and Professional Title */}
-        <div className="flex-1 space-y-1">
-          <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}>
-            <EditableField
-              value={personalInfo.firstName}
-              placeholder="First Name"
-              onSave={(val) => handlePersonalChange("firstName", val)}
-              isPrintView={isPrintView}
-              className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
-            />
-            <span className="mx-1"></span>
-            <EditableField
-              value={personalInfo.lastName}
-              placeholder="Last Name"
-              onSave={(val) => handlePersonalChange("lastName", val)}
-              isPrintView={isPrintView}
-              className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
-            />
-          </h1>
-          
-          <div className="text-[12px] font-bold tracking-wider uppercase mt-1.5" style={accentStyle}>
-            <EditableField
-              value={personalInfo.title}
-              placeholder="Professional Title"
-              onSave={(val) => handlePersonalChange("title", val)}
-              isPrintView={isPrintView}
-              className="font-bold text-[12px]"
-            />
-          </div>
-        </div>
-
-        {/* Right Side: Contact Info Grid (Sleek grid) */}
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10.5px] text-gray-600 font-semibold shrink-0">
-          {/* Email */}
-          <div className="flex items-center gap-1.5">
-            <Mail size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.email}
-              placeholder="email@example.com"
-              onSave={(val) => handlePersonalChange("email", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-
-          {/* Phone */}
-          <div className="flex items-center gap-1.5">
-            <Phone size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.phone}
-              placeholder="+1 (555) 012-3456"
-              onSave={(val) => handlePersonalChange("phone", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-
-          {/* Location */}
-          <div className="flex items-center gap-1.5">
-            <MapPin size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.location}
-              placeholder="City, State"
-              onSave={(val) => handlePersonalChange("location", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-
-          {/* Website */}
-          <div className="flex items-center gap-1.5">
-            <Globe size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.website}
-              placeholder="website.com"
-              onSave={(val) => handlePersonalChange("website", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-
-          {/* LinkedIn */}
-          <div className="flex items-center gap-1.5">
-            <Linkedin size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.linkedin}
-              placeholder="linkedin.com/in/user"
-              onSave={(val) => handlePersonalChange("linkedin", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-
-          {/* GitHub */}
-          <div className="flex items-center gap-1.5">
-            <Github size={11} className="text-gray-400" />
-            <EditableField
-              value={personalInfo.github}
-              placeholder="github.com/user"
-              onSave={(val) => handlePersonalChange("github", val)}
-              isPrintView={isPrintView}
-            />
-          </div>
-        </div>
-
-      </header>
-
-      {/* 2. BODY CONTENT (Modular Columns or Single Column vertical list) */}
-      <div className="flex-1 flex flex-col justify-start">
-        {layoutStyle === "double" ? (
-          /* DUAL COLUMN STRUCTURE */
-          <div className="flex gap-6 items-stretch w-full flex-1">
-            {/* Column 1 (Left Column) */}
-            <div className={`${colWidths.left} flex flex-col gap-1.5`}>
-              {leftColumnSections.map((secId) => dispatchSection(secId))}
-            </div>
+  const renderPage = (pageNum) => {
+    return (
+      <div 
+        className={`resume-preview-sheet ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} ${leadingClass} flex flex-col bg-white text-gray-800 relative w-[210mm] min-h-[297mm] p-[20mm] ${
+          isPrintView ? 'page-break-container' : 'shadow-xl rounded-lg mb-6'
+        }`}
+        style={pageNum === 2 && isPrintView ? { pageBreakBefore: "always", breakBefore: "page" } : {}}
+      >
+        {/* 1. HEADER SECTION (Always Full Width - only on page 1) */}
+        {pageNum === 1 && (
+          <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 mb-4 border-b-2" style={borderPrimaryStyle}>
             
-            {/* Split divider lines depending on template style */}
-            <div className="w-px bg-slate-200/80 shrink-0 self-stretch no-print" />
-
-            {/* Column 2 (Right Column) */}
-            <div className={`${colWidths.right} flex flex-col gap-1.5`}>
-              {rightColumnSections.map((secId) => dispatchSection(secId))}
+            {/* Left Side: Name and Professional Title */}
+            <div className="flex-1 space-y-1">
+              <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}>
+                <EditableField
+                  value={personalInfo.firstName}
+                  placeholder="First Name"
+                  onSave={(val) => handlePersonalChange("firstName", val)}
+                  isPrintView={isPrintView}
+                  className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
+                />
+                <span className="mx-1"></span>
+                <EditableField
+                  value={personalInfo.lastName}
+                  placeholder="Last Name"
+                  onSave={(val) => handlePersonalChange("lastName", val)}
+                  isPrintView={isPrintView}
+                  className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
+                />
+              </h1>
+              
+              <div className="text-[12px] font-bold tracking-wider uppercase mt-1.5" style={accentStyle}>
+                <EditableField
+                  value={personalInfo.title}
+                  placeholder="Professional Title"
+                  onSave={(val) => handlePersonalChange("title", val)}
+                  isPrintView={isPrintView}
+                  className="font-bold text-[12px]"
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          /* SINGLE COLUMN STRUCTURE */
-          <div className="space-y-2.5">
-            {sectionOrder.map((secId) => dispatchSection(secId))}
-          </div>
-        )}
-      </div>
 
+            {/* Right Side: Contact Info Grid (Sleek grid) */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10.5px] text-gray-600 font-semibold shrink-0">
+              {/* Email */}
+              <div className="flex items-center gap-1.5">
+                <Mail size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.email}
+                  placeholder="email@example.com"
+                  onSave={(val) => handlePersonalChange("email", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-center gap-1.5">
+                <Phone size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.phone}
+                  placeholder="+1 (555) 012-3456"
+                  onSave={(val) => handlePersonalChange("phone", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* Location */}
+              <div className="flex items-center gap-1.5">
+                <MapPin size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.location}
+                  placeholder="City, State"
+                  onSave={(val) => handlePersonalChange("location", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* Website */}
+              <div className="flex items-center gap-1.5">
+                <Globe size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.website}
+                  placeholder="website.com"
+                  onSave={(val) => handlePersonalChange("website", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* LinkedIn */}
+              <div className="flex items-center gap-1.5">
+                <Linkedin size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.linkedin}
+                  placeholder="linkedin.com/in/user"
+                  onSave={(val) => handlePersonalChange("linkedin", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+
+              {/* GitHub */}
+              <div className="flex items-center gap-1.5">
+                <Github size={11} className="text-gray-400" />
+                <EditableField
+                  value={personalInfo.github}
+                  placeholder="github.com/user"
+                  onSave={(val) => handlePersonalChange("github", val)}
+                  isPrintView={isPrintView}
+                />
+              </div>
+            </div>
+
+          </header>
+        )}
+
+        {/* 2. BODY CONTENT (Modular Columns or Single Column vertical list) */}
+        <div className="flex-1 flex flex-col justify-start">
+          {layoutStyle === "double" ? (
+            /* DUAL COLUMN STRUCTURE */
+            <div className="flex gap-6 items-stretch w-full flex-1">
+              {/* Column 1 (Left Column) */}
+              <div className={`${colWidths.left} flex flex-col gap-1.5`}>
+                {leftColumnSections.map((secId) => dispatchSection(secId, pageNum))}
+              </div>
+              
+              {/* Split divider lines depending on template style */}
+              <div className="w-px bg-slate-200/80 shrink-0 self-stretch no-print" />
+
+              {/* Column 2 (Right Column) */}
+              <div className={`${colWidths.right} flex flex-col gap-1.5`}>
+                {rightColumnSections.map((secId) => dispatchSection(secId, pageNum))}
+              </div>
+            </div>
+          ) : (
+            /* SINGLE COLUMN STRUCTURE */
+            <div className="space-y-2.5">
+              {sectionOrder.map((secId) => dispatchSection(secId, pageNum))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const hasPage2 = (
+    experience.length > 3 || 
+    (experience.length > 2 && education.length > 0) || 
+    projects.length > 0 || 
+    skills.length > 2 || 
+    languages.length > 2 || 
+    strengths.length > 0 || 
+    passions.length > 0 || 
+    achievements.length > 0 ||
+    customSections.length > 0
+  );
+
+  return (
+    <div id="resume-preview-root" className={`flex flex-col items-center w-full ${isPrintView ? 'print-area' : ''}`}>
+      {/* Page 1 */}
+      {renderPage(1)}
+
+      {/* Page 2 */}
+      {hasPage2 && (
+        <>
+          {/* Page Break Visual Divider (Hidden in print) */}
+          <div className="w-full flex items-center justify-center my-8 no-print page-break-divider">
+            <div className="w-24 h-px bg-slate-300 dark:bg-slate-700" />
+            <span className="mx-4 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Page 2</span>
+            <div className="w-24 h-px bg-slate-300 dark:bg-slate-700" />
+          </div>
+          {renderPage(2)}
+        </>
+      )}
     </div>
   );
 }
