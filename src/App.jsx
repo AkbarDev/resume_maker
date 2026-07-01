@@ -32,6 +32,7 @@ export default function App() {
   const [activeAIRequest, setActiveAIRequest] = useState(null);
   const [isAIPanelOpen, setIsAIPanelOpen] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
+  const [isRearrangeOpen, setIsRearrangeOpen] = useState(false);
 
   // Load resumes when user logs in
   useEffect(() => {
@@ -197,6 +198,108 @@ export default function App() {
     );
   }
 
+  const getRearrangeItems = () => {
+    if (!activeResume) return { page1: [], page2: [] };
+    const order = activeResume.layoutSettings?.sectionOrder || [];
+    const disabled = activeResume.layoutSettings?.disabledSections || [];
+    const active = order.filter(secId => !disabled.includes(secId));
+    
+    const page1 = [];
+    const page2 = [];
+    
+    active.forEach(secId => {
+      if (secId === "summary" || secId === "skills") {
+        page1.push(secId);
+      } else if (secId === "experience") {
+        page1.push("experience");
+        page2.push("experience");
+      } else {
+        page2.push(secId);
+      }
+    });
+
+    return { page1, page2 };
+  };
+
+  const handleRearrangeDrop = (draggedId, targetId) => {
+    if (!activeResume || draggedId === targetId || draggedId === "header" || targetId === "header") return;
+    
+    const order = [...(activeResume.layoutSettings?.sectionOrder || [])];
+    const draggedIdx = order.indexOf(draggedId);
+    const targetIdx = order.indexOf(targetId);
+    if (draggedIdx === -1 || targetIdx === -1) return;
+    
+    // Swap/reorder
+    order.splice(draggedIdx, 1);
+    order.splice(targetIdx, 0, draggedId);
+    
+    // Sort columns
+    const left = [...(activeResume.layoutSettings?.leftColumnSections || [])];
+    left.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    
+    const right = [...(activeResume.layoutSettings?.rightColumnSections || [])];
+    right.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    
+    handleResumeChange({
+      ...activeResume,
+      layoutSettings: {
+        ...activeResume.layoutSettings,
+        sectionOrder: order,
+        leftColumnSections: left,
+        rightColumnSections: right
+      }
+    });
+  };
+
+  // Rearrange Draggable Block Component
+  const RearrangeItem = ({ secId, isTall }) => {
+    const labelMap = {
+      summary: "Summary",
+      skills: "Skills",
+      experience: "Experience",
+      education: "Education",
+      projects: "Projects",
+      languages: "Languages",
+      certifications: "Certifications",
+      strengths: "Strengths",
+      passions: "Passions",
+      achievements: "Key Achievements",
+      books: "Books",
+      quotes: "Quotes",
+      dayInLife: "Day in the Life"
+    };
+
+    const handleDragStart = (e) => {
+      e.dataTransfer.setData("text/plain", secId);
+    };
+
+    const handleDrop = (e) => {
+      e.preventDefault();
+      const draggedId = e.dataTransfer.getData("text/plain");
+      handleRearrangeDrop(draggedId, secId);
+    };
+
+    const label = labelMap[secId] || secId;
+
+    return (
+      <div
+        draggable="true"
+        onDragStart={handleDragStart}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+        className={`bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:border-emerald-400 hover:bg-emerald-50/10 rounded-lg p-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing transition-all select-none relative group ${
+          isTall ? "h-24 sm:h-28" : ""
+        }`}
+      >
+        {/* Grip Handle */}
+        <div className="absolute left-3 text-slate-400 dark:text-slate-500 font-mono text-[13px] tracking-tighter pointer-events-none group-hover:text-emerald-500 transition-colors">
+          ::
+        </div>
+        <span>{label}</span>
+      </div>
+    );
+  };
+
   // Active Workspace view
   return (
     <div className={`min-h-screen ${theme} bg-dark-bg text-slate-100 flex flex-col font-inter transition-colors duration-200`}>
@@ -259,7 +362,7 @@ export default function App() {
           {/* Rearrange button */}
           <button
             onClick={() => {
-              alert("Rearrange Mode Activated: Drag or use arrow controls on cards to shift sections.");
+              setIsRearrangeOpen(true);
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-dark-border bg-slate-900/40 text-gray-300 hover:text-white cursor-pointer transition-all"
             title="Reorder and Shift Resume Sections"
@@ -420,6 +523,62 @@ export default function App() {
           isPrintView={true} 
         />
       </div>
+
+      {/* Rearrange Sections Overlay Modal */}
+      {isRearrangeOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-start overflow-y-auto py-10 px-4 no-print">
+          <div className="max-w-md w-full flex flex-col items-center">
+            {/* Title */}
+            <h2 className="text-xl sm:text-2xl font-outfit font-extrabold text-white tracking-wide mb-6 text-center">
+              Hold & Drag the boxes to rearrange the sections
+            </h2>
+
+            {/* Page 1 of 2 Container */}
+            <div className="w-full mb-8">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center mb-2">Page 1 of 2</p>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col gap-2 min-h-[200px]">
+                {/* Header is always first and locked */}
+                <div className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-950 dark:text-indigo-200 border border-indigo-200/50 dark:border-indigo-900/40 p-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 opacity-80 select-none">
+                  <span className="opacity-75">🔒</span>
+                  <span>Header</span>
+                </div>
+
+                {/* Render page 1 sections */}
+                {getRearrangeItems().page1.map((secId, i) => (
+                  <RearrangeItem 
+                    key={`${secId}-p1-${i}`}
+                    secId={secId} 
+                    isTall={secId === "experience"}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Page 2 of 2 Container */}
+            <div className="w-full mb-8">
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest text-center mb-2">Page 2 of 2</p>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-xl flex flex-col gap-2 min-h-[200px]">
+                {/* Render page 2 sections */}
+                {getRearrangeItems().page2.map((secId, i) => (
+                  <RearrangeItem 
+                    key={`${secId}-p2-${i}`}
+                    secId={secId} 
+                    isTall={secId === "experience"}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Continue Editing Button */}
+            <button
+              onClick={() => setIsRearrangeOpen(false)}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-2.5 rounded-lg text-xs tracking-wider uppercase shadow-lg transition-all hover:scale-105 cursor-pointer"
+            >
+              Continue Editing
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
