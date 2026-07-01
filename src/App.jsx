@@ -251,6 +251,20 @@ export default function App() {
     });
   };
 
+  const handleDisableSection = (secId) => {
+    if (!activeResume) return;
+    const disabled = activeResume.layoutSettings?.disabledSections || [];
+    if (disabled.includes(secId)) return;
+    
+    handleResumeChange({
+      ...activeResume,
+      layoutSettings: {
+        ...activeResume.layoutSettings,
+        disabledSections: [...disabled, secId]
+      }
+    });
+  };
+
   // Rearrange Draggable Block Component
   const RearrangeItem = ({ secId, isTall }) => {
     const labelMap = {
@@ -296,6 +310,18 @@ export default function App() {
           ::
         </div>
         <span>{label}</span>
+
+        {/* Close 'x' mark button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDisableSection(secId);
+          }}
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700/85 text-slate-400 hover:text-red-500 flex items-center justify-center cursor-pointer transition-colors text-[12px] font-bold"
+          title={`Remove ${label}`}
+        >
+          ×
+        </button>
       </div>
     );
   };
