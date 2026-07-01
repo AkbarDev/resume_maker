@@ -19,9 +19,9 @@
   --color-theme-accent-lighter: #d1fae5;
   --color-theme-accent-light: #a7f3d0;
   --color-theme-accent-soft: #6ee7b7;
-  --color-theme-accent: #2dc08d;
-  --color-theme-accent-hover: #1b8861;
-  --color-theme-accent-darker: #115c41;
+  --color-theme-accent: #2dc08d;        /* Enhancv logo green */
+  --color-theme-accent-hover: #1b8861;  /* Darker emerald hover */
+  --color-theme-accent-text: #115c41;   /* Deeper contrast for light text */
   --color-theme-accent-darkest: #093c2a;
   --color-theme-accent-night: #04241a;
 }
@@ -44,9 +44,9 @@
   --color-theme-accent-lighter: #164030;
   --color-theme-accent-light: #1b5c45;
   --color-theme-accent-soft: #207d5d;
-  --color-theme-accent: #2dc08d;
-  --color-theme-accent-hover: #4fe3aa;
-  --color-theme-accent-darker: #24a87a;
+  --color-theme-accent: #2dc08d;        /* Enhancv logo green */
+  --color-theme-accent-hover: #24a87a;  /* Medium emerald hover */
+  --color-theme-accent-text: #34d399;   /* Bright mint text */
   --color-theme-accent-darkest: #1b8861;
   --color-theme-accent-night: #093c2a;
 }
@@ -69,9 +69,9 @@
   --color-indigo-100: var(--color-theme-accent-lighter);
   --color-indigo-200: var(--color-theme-accent-light);
   --color-indigo-300: var(--color-theme-accent-soft);
-  --color-indigo-400: var(--color-theme-accent);
+  --color-indigo-400: var(--color-theme-accent-text);
   --color-indigo-500: var(--color-theme-accent-hover);
-  --color-indigo-600: var(--color-theme-accent-darker);
+  --color-indigo-600: var(--color-theme-accent);
   --color-indigo-900: var(--color-theme-accent-darkest);
   --color-indigo-950: var(--color-theme-accent-night);
 }
