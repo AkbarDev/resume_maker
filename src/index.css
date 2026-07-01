@@ -14,16 +14,16 @@
   --color-workspace-bg: #cbd5e1;
   --color-card-darker: #f8fafc;
 
-  /* Day: Sleek Teal & Emerald */
-  --color-theme-accent-lightest: #f0fdfa;
-  --color-theme-accent-lighter: #ccfbf1;
-  --color-theme-accent-light: #99f6e4;
-  --color-theme-accent-soft: #5eead4;
-  --color-theme-accent: #0d9488;
-  --color-theme-accent-hover: #0f766e;
-  --color-theme-accent-darker: #115e59;
-  --color-theme-accent-darkest: #134e4a;
-  --color-theme-accent-night: #042f2e;
+  /* Day: Enhancv Brand Green (#2DC08D) */
+  --color-theme-accent-lightest: #ecfdf5;
+  --color-theme-accent-lighter: #d1fae5;
+  --color-theme-accent-light: #a7f3d0;
+  --color-theme-accent-soft: #6ee7b7;
+  --color-theme-accent: #2dc08d;
+  --color-theme-accent-hover: #1b8861;
+  --color-theme-accent-darker: #115c41;
+  --color-theme-accent-darkest: #093c2a;
+  --color-theme-accent-night: #04241a;
 }
 
 .dark {
@@ -39,16 +39,16 @@
   --color-workspace-bg: #020617;
   --color-card-darker: #0b0f19;
 
-  /* Night: Glowing Emerald & Teal */
-  --color-theme-accent-lightest: #ecfdf5;
-  --color-theme-accent-lighter: #d1fae5;
-  --color-theme-accent-light: #a7f3d0;
-  --color-theme-accent-soft: #6ee7b7;
-  --color-theme-accent: #34d399;
-  --color-theme-accent-hover: #10b981;
-  --color-theme-accent-darker: #059669;
-  --color-theme-accent-darkest: #064e3b;
-  --color-theme-accent-night: #022c22;
+  /* Night: Glowing Enhancv Green (#2DC08D) */
+  --color-theme-accent-lightest: #112d22;
+  --color-theme-accent-lighter: #164030;
+  --color-theme-accent-light: #1b5c45;
+  --color-theme-accent-soft: #207d5d;
+  --color-theme-accent: #2dc08d;
+  --color-theme-accent-hover: #4fe3aa;
+  --color-theme-accent-darker: #24a87a;
+  --color-theme-accent-darkest: #1b8861;
+  --color-theme-accent-night: #093c2a;
 }
 
 @theme {
