@@ -13,6 +13,17 @@
   --color-text-muted: #64748b;
   --color-workspace-bg: #cbd5e1;
   --color-card-darker: #f8fafc;
+
+  /* Day: Sleek Teal & Emerald */
+  --color-theme-accent-lightest: #f0fdfa;
+  --color-theme-accent-lighter: #ccfbf1;
+  --color-theme-accent-light: #99f6e4;
+  --color-theme-accent-soft: #5eead4;
+  --color-theme-accent: #0d9488;
+  --color-theme-accent-hover: #0f766e;
+  --color-theme-accent-darker: #115e59;
+  --color-theme-accent-darkest: #134e4a;
+  --color-theme-accent-night: #042f2e;
 }
 
 .dark {
@@ -27,6 +38,17 @@
   --color-text-muted: #94a3b8;
   --color-workspace-bg: #020617;
   --color-card-darker: #0b0f19;
+
+  /* Night: Glowing Emerald & Teal */
+  --color-theme-accent-lightest: #ecfdf5;
+  --color-theme-accent-lighter: #d1fae5;
+  --color-theme-accent-light: #a7f3d0;
+  --color-theme-accent-soft: #6ee7b7;
+  --color-theme-accent: #34d399;
+  --color-theme-accent-hover: #10b981;
+  --color-theme-accent-darker: #059669;
+  --color-theme-accent-darkest: #064e3b;
+  --color-theme-accent-night: #022c22;
 }
 
 @theme {
@@ -38,11 +60,20 @@
   --font-montserrat: "Montserrat", sans-serif;
   --font-lora: "Lora", serif;
   
-  --color-brand-primary: #6366f1;
-  --color-brand-secondary: #4f46e5;
   --color-dark-bg: var(--color-page-bg);
   --color-dark-card: var(--color-panel-bg);
   --color-dark-border: var(--color-panel-border);
+
+  /* Redefining indigo to point to our dynamic variables */
+  --color-indigo-50: var(--color-theme-accent-lightest);
+  --color-indigo-100: var(--color-theme-accent-lighter);
+  --color-indigo-200: var(--color-theme-accent-light);
+  --color-indigo-300: var(--color-theme-accent-soft);
+  --color-indigo-400: var(--color-theme-accent);
+  --color-indigo-500: var(--color-theme-accent-hover);
+  --color-indigo-600: var(--color-theme-accent-darker);
+  --color-indigo-900: var(--color-theme-accent-darkest);
+  --color-indigo-950: var(--color-theme-accent-night);
 }
 
 /* Custom scrollbars */
