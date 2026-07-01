@@ -206,179 +206,213 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
         
         {/* DESIGN TAB */}
         {activeTab === "design" && (
-          <div className="space-y-4">
+          <div className="space-y-5">
             
-            {/* Color Palette Selector */}
+            {/* 1. Page Margins Slider */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                <span>PAGE MARGINS: {{ compact: 1, normal: 2, loose: 3 }[data.layoutSettings?.marginSize] || 2}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold">
+                <span>narrow</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  value={{ compact: 1, normal: 2, loose: 3 }[data.layoutSettings?.marginSize] || 2}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    const size = { 1: "compact", 2: "normal", 3: "loose" }[val];
+                    handleLayoutChange("marginSize", size);
+                  }}
+                  className="flex-1 accent-emerald-500 bg-slate-800 h-1 rounded-lg cursor-pointer"
+                />
+                <span>wide</span>
+              </div>
+            </div>
+
+            {/* 2. Section Spacing Slider */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                <span>SECTION SPACING: {{ compact: 1, normal: 2, loose: 3 }[data.layoutSettings?.spacing] || 2}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold">
+                <span>compact</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  value={{ compact: 1, normal: 2, loose: 3 }[data.layoutSettings?.spacing] || 2}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    const size = { 1: "compact", 2: "normal", 3: "loose" }[val];
+                    handleLayoutChange("spacing", size);
+                  }}
+                  className="flex-1 accent-emerald-500 bg-slate-800 h-1 rounded-lg cursor-pointer"
+                />
+                <span>more space</span>
+              </div>
+            </div>
+
+            {/* 3. Colors Palette Picker */}
             <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-3">
-              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Color Themes</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {COLOR_PRESETS.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      handleLayoutChange("primaryColor", preset.primary);
-                      handleLayoutChange("accentColor", preset.accent);
+              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Colors</h3>
+              <div className="flex flex-wrap gap-2.5 items-center">
+                {[
+                  { primary: "#1d4ed8", accent: "#2dc08d" }, // Blue Mint
+                  { primary: "#0f172a", accent: "#f97316" }, // Slate Orange
+                  { primary: "#312e81", accent: "#8b5cf6" }, // Indigo Violet
+                  { primary: "#111827", accent: "#06b6d4" }, // Slate Cyan
+                  { primary: "#1c1917", accent: "#eab308" }, // Stone Gold
+                  { primary: "#0f172a", accent: "#2563eb" }, // Slate Blue
+                  { primary: "#0f172a", accent: "#dc2626" }, // Slate Red
+                  { primary: "#064e3b", accent: "#059669" }  // Dark Green
+                ].map((pres, idx) => {
+                  const isSelected = data.layoutSettings?.primaryColor === pres.primary && data.layoutSettings?.accentColor === pres.accent;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        handleLayoutChange("primaryColor", pres.primary);
+                        handleLayoutChange("accentColor", pres.accent);
+                      }}
+                      className="w-7 h-7 rounded-full relative border border-slate-700/50 cursor-pointer shadow flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+                      style={{
+                        background: `linear-gradient(135deg, ${pres.primary} 50%, ${pres.accent} 50%)`
+                      }}
+                    >
+                      {isSelected && (
+                        <span className="text-[10px] text-white font-bold drop-shadow">✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {/* Custom Add Color Trigger */}
+                <div className="relative group">
+                  <input
+                    type="color"
+                    id="custom-color-bubble"
+                    value={data.layoutSettings?.accentColor || "#2dc08d"}
+                    onChange={(e) => {
+                      handleLayoutChange("accentColor", e.target.value);
                     }}
-                    className="p-1 rounded-lg border border-dark-border bg-slate-900/60 hover:bg-slate-800 hover:border-slate-600 hover:font-bold transition-all flex flex-col items-center gap-1 cursor-pointer group"
-                    title={preset.name}
-                  >
-                    <div className="flex gap-0.5">
-                      <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: preset.primary }} />
-                      <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: preset.accent }} />
-                    </div>
-                    <span className="text-[8px] text-slate-400 group-hover:text-slate-200 truncate max-w-full text-center">{preset.name.split(" ")[0]}</span>
+                    className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer z-10"
+                  />
+                  <button className="w-7 h-7 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shadow transition-transform group-hover:scale-110">
+                    +
                   </button>
-                ))}
-              </div>
-
-              {/* Custom Color Pickers */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-400 mb-1">Primary Color</label>
-                  <div className="flex items-center gap-1.5 bg-slate-900/80 border border-dark-border rounded-lg p-1">
-                    <input
-                      type="color"
-                      value={data.layoutSettings?.primaryColor || "#0f172a"}
-                      onChange={(e) => handleLayoutChange("primaryColor", e.target.value)}
-                      className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent"
-                    />
-                    <span className="text-[10px] font-mono text-slate-300 uppercase">{data.layoutSettings?.primaryColor}</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-400 mb-1">Accent Accent</label>
-                  <div className="flex items-center gap-1.5 bg-slate-900/80 border border-dark-border rounded-lg p-1">
-                    <input
-                      type="color"
-                      value={data.layoutSettings?.accentColor || "#4f46e5"}
-                      onChange={(e) => handleLayoutChange("accentColor", e.target.value)}
-                      className="w-6 h-6 rounded cursor-pointer border-0 bg-transparent"
-                    />
-                    <span className="text-[10px] font-mono text-slate-300 uppercase">{data.layoutSettings?.accentColor}</span>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Typography Selection */}
+            {/* 4. Font Style Dropdown Selector */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Font Style</h3>
+              <select
+                value={data.layoutSettings?.fontFamily || "sans"}
+                onChange={(e) => handleLayoutChange("fontFamily", e.target.value)}
+                className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
+              >
+                {Object.entries(FONTS).map(([key, val]) => (
+                  <option key={key} value={key} className="bg-slate-900 text-white font-medium">
+                    {val.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 5. Font Size Slider */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                <span className="uppercase">FONT SIZE: {{ xs: "Extra Small", sm: "Small", base: "Medium", lg: "Large" }[data.layoutSettings?.fontSize] || "Medium"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold">
+                <span>- A</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  value={{ xs: 1, sm: 2, base: 3, lg: 4 }[data.layoutSettings?.fontSize] || 3}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    const size = { 1: "xs", 2: "sm", 3: "base", 4: "lg" }[val];
+                    handleLayoutChange("fontSize", size);
+                  }}
+                  className="flex-1 accent-emerald-500 bg-slate-800 h-1 rounded-lg cursor-pointer"
+                />
+                <span>+ A</span>
+              </div>
+            </div>
+
+            {/* 6. Line Height Slider */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                <span>LINE HEIGHT: {{ tight: 1, normal: 2, relaxed: 3 }[data.layoutSettings?.lineHeight] || 2}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold">
+                <span>condensed</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  value={{ tight: 1, normal: 2, relaxed: 3 }[data.layoutSettings?.lineHeight] || 2}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    const height = { 1: "tight", 2: "normal", 3: "relaxed" }[val];
+                    handleLayoutChange("lineHeight", height);
+                  }}
+                  className="flex-1 accent-emerald-500 bg-slate-800 h-1 rounded-lg cursor-pointer"
+                />
+                <span>spacious</span>
+              </div>
+            </div>
+
+            {/* 7. Backgrounds Grid */}
             <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-3">
-              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Typography Font</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(FONTS).map(([key, value]) => (
-                  <button
-                    key={key}
-                    onClick={() => handleLayoutChange("fontFamily", key)}
-                    className={`py-2 px-2.5 rounded-xl border text-xs text-center transition-all cursor-pointer ${
-                      data.layoutSettings?.fontFamily === key
-                        ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold shadow-sm"
-                        : "bg-slate-900/60 border-dark-border text-slate-300 hover:border-indigo-500/20 hover:font-bold hover:text-slate-100"
-                    }`}
-                  >
-                    <span className="block font-medium">{value.label.split(" / ")[0]}</span>
-                    <span className="text-[9px] text-slate-400 italic font-normal">{value.label.split(" / ")[1]}</span>
-                  </button>
-                ))}
+              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Backgrounds</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: "blank", label: "Blank" },
+                  { id: "grid", label: "Grid" },
+                  { id: "dots", label: "Dots" },
+                  { id: "diagonal", label: "Stripes" },
+                  { id: "soft", label: "Gradient" }
+                ].map((pat) => {
+                  const isSelected = (data.layoutSettings?.backgroundPattern || "blank") === pat.id;
+                  return (
+                    <button
+                      key={pat.id}
+                      onClick={() => handleLayoutChange("backgroundPattern", pat.id)}
+                      className={`h-11 rounded-lg border text-[9px] font-extrabold flex flex-col items-center justify-center gap-1 cursor-pointer transition-all relative overflow-hidden ${
+                        isSelected 
+                          ? "bg-emerald-500/10 border-emerald-400 text-emerald-400 shadow-sm" 
+                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="absolute top-1 right-1 text-[8px] font-bold">✓</span>
+                      )}
+                      <span className="truncate max-w-full px-1">{pat.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Layout Geometry controls */}
-            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-4">
-              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Geometry Settings</h3>
-
-              {/* Margins */}
-              <div>
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1.5">
-                  <span>Page Margins</span>
-                  <span className="capitalize text-slate-200">{data.layoutSettings?.marginSize || "normal"}</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {["compact", "normal", "loose"].map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => handleLayoutChange("marginSize", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
-                        data.layoutSettings?.marginSize === sz
-                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Spacing / Section Padding */}
-              <div>
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1.5">
-                  <span>Section Padding</span>
-                  <span className="capitalize text-slate-200">{data.layoutSettings?.spacing || "normal"}</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {["compact", "normal", "loose"].map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => handleLayoutChange("spacing", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
-                        data.layoutSettings?.spacing === sz
-                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Font Sizing */}
-              <div>
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1.5">
-                  <span>Font Sizing</span>
-                  <span className="uppercase text-slate-200">{data.layoutSettings?.fontSize || "sm"}</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {["xs", "sm", "base", "lg"].map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => handleLayoutChange("fontSize", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
-                        data.layoutSettings?.fontSize === sz
-                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Line Heights */}
-              <div>
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1.5">
-                  <span>Line Height</span>
-                  <span className="capitalize text-slate-200">{data.layoutSettings?.lineHeight || "normal"}</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {["tight", "normal", "relaxed"].map((sz) => (
-                    <button
-                      key={sz}
-                      onClick={() => handleLayoutChange("lineHeight", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
-                        data.layoutSettings?.lineHeight === sz
-                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* 8. Signature Block */}
+            <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-2">
+              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Signature Line</h3>
+              <input
+                type="text"
+                value={data.layoutSettings?.signatureText || ""}
+                onChange={(e) => handleLayoutChange("signatureText", e.target.value)}
+                placeholder="Type your name to sign CV"
+                className="w-full bg-slate-900 border border-dark-border rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 font-semibold"
+              />
             </div>
 
-            {/* Heading Style Options */}
+            {/* 9. Heading Style Options */}
             <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-3">
               <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Heading Decors</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -393,7 +427,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     onClick={() => handleLayoutChange("headingStyle", style.id)}
                     className={`py-2 px-2 rounded-xl border text-[10px] font-bold text-center transition-all cursor-pointer ${
                       data.layoutSettings?.headingStyle === style.id
-                        ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                        ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold shadow-sm"
                         : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                     }`}
                   >

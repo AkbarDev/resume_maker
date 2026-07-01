@@ -1831,13 +1831,39 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
   const colWidths = getColumnWidths();
 
+  const PATTERNS = {
+    blank: {},
+    grid: {
+      backgroundImage: "linear-gradient(#f1f5f9 1px, transparent 1px), linear-gradient(90deg, #f1f5f9 1px, transparent 1px)",
+      backgroundSize: "20px 20px"
+    },
+    dots: {
+      backgroundImage: "radial-gradient(#e2e8f0 1.2px, transparent 1.2px)",
+      backgroundSize: "12px 12px"
+    },
+    diagonal: {
+      backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 10px, #f8fafc 10px, #f8fafc 20px)"
+    },
+    soft: {
+      backgroundImage: "linear-gradient(135deg, #ffffff 60%, #f8fafc 100%)"
+    }
+  };
+
+  const backgroundPattern = layoutSettings.backgroundPattern || "blank";
+  const patternStyle = PATTERNS[backgroundPattern] || {};
+
   const renderPage = (pageNum) => {
+    const pageStyle = {
+      ...(pageNum === 2 && isPrintView ? { pageBreakBefore: "always", breakBefore: "page" } : {}),
+      ...patternStyle
+    };
+
     return (
       <div 
         className={`resume-preview-sheet ${fontConfig.bodyClass} ${sizeConfig.body} ${paddingClass} ${leadingClass} flex flex-col bg-white text-gray-800 relative w-[210mm] min-h-[297mm] p-[20mm] ${
           isPrintView ? 'page-break-container' : 'shadow-xl rounded-lg mb-6'
         }`}
-        style={pageNum === 2 && isPrintView ? { pageBreakBefore: "always", breakBefore: "page" } : {}}
+        style={pageStyle}
       >
         {/* 1. HEADER SECTION (Always Full Width - only on page 1) */}
         {pageNum === 1 && (
@@ -1971,6 +1997,18 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
             </div>
           )}
         </div>
+
+        {/* Cursive Signature Block (Only on last page) */}
+        {((hasPage2 && pageNum === 2) || (!hasPage2 && pageNum === 1)) && layoutSettings.signatureText && (
+          <div className="mt-8 self-end text-right border-t border-slate-200/80 pt-1.5 min-w-[140px] print-section">
+            <span className="font-serif italic text-base text-gray-800 tracking-wide font-semibold block pr-2">
+              {layoutSettings.signatureText}
+            </span>
+            <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold block">
+              Authorized Signature
+            </span>
+          </div>
+        )}
       </div>
     );
   };
