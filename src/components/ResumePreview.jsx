@@ -135,7 +135,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     accentColor = "#4f46e5", 
     fontSize = "sm", 
     spacing = "normal", 
-    fontFamily = "sans",
+    fontFamily = "rubik",
     lineHeight = "normal", 
     marginSize = "normal",
     headingStyle = "accent",
@@ -271,7 +271,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     );
   };
 
-  const fontConfig = FONTS[fontFamily] || FONTS.sans;
+  const fontConfig = FONTS[fontFamily] || FONTS.rubik;
   const sizeConfig = SIZES[fontSize] || SIZES.sm;
 
   // Custom margin map
@@ -1855,7 +1855,8 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
   const renderPage = (pageNum) => {
     const pageStyle = {
       ...(pageNum === 2 && isPrintView ? { pageBreakBefore: "always", breakBefore: "page" } : {}),
-      ...patternStyle
+      ...patternStyle,
+      ...(fontConfig.style || {})
     };
 
     return (

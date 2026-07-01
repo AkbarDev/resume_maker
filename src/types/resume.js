@@ -101,7 +101,7 @@ export const INITIAL_RESUME_DATA = {
     accentColor: "#4f46e5", // Indigo 600
     fontSize: "sm", // xs, sm, base, lg
     spacing: "normal", // compact, normal, loose
-    fontFamily: "sans", // sans, lato, montserrat, lora, serif, mono
+    fontFamily: "rubik", // rubik, arimo, lato, raleway, bitter, exo2, chivo, tinos, montserrat, oswald, volkhov, gelasio
     lineHeight: "normal", // tight, normal, relaxed
     marginSize: "normal", // compact, normal, loose
     headingStyle: "accent", // line, accent, block, clean

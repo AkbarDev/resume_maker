@@ -11,14 +11,14 @@ export const CURATED_TEMPLATES = [
     name: "Senior Solutions Architect",
     description: "Modern, timeline-based layout with indigo highlights. Clean and readable structure preferred by tech recruiters.",
     category: "Tech",
-    settings: { template: "modern", primaryColor: "#1e1b4b", accentColor: "#4f46e5", fontSize: "sm", spacing: "compact", fontFamily: "sans", lineHeight: "normal", marginSize: "compact" }
+    settings: { template: "modern", primaryColor: "#1e1b4b", accentColor: "#4f46e5", fontSize: "sm", spacing: "compact", fontFamily: "rubik", lineHeight: "normal", marginSize: "compact" }
   },
   {
     id: "recruiter-3",
     name: "Creative UX / Product Designer",
     description: "Double-column sidebar format with rich emerald highlights. Perfect for designers, curators, and creative professionals.",
     category: "Creative",
-    settings: { template: "creative", primaryColor: "#064e3b", accentColor: "#10b981", fontSize: "sm", spacing: "normal", fontFamily: "sans", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "creative", primaryColor: "#064e3b", accentColor: "#10b981", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
   },
   {
     id: "recruiter-4",
@@ -39,7 +39,7 @@ export const CURATED_TEMPLATES = [
     name: "Product Operations Lead",
     description: "Clean modern headings with teal dividers. Ideal for operations managers, PMs, and customer leads.",
     category: "Professional",
-    settings: { template: "modern", primaryColor: "#115e59", accentColor: "#14b8a6", fontSize: "sm", spacing: "normal", fontFamily: "sans", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "modern", primaryColor: "#115e59", accentColor: "#14b8a6", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
   },
   {
     id: "recruiter-7",
@@ -60,21 +60,21 @@ export const CURATED_TEMPLATES = [
     name: "Digital Marketing Specialist",
     description: "Stylish sidebar configuration with rose details. High visual impact layout for creative marketers.",
     category: "Creative",
-    settings: { template: "creative", primaryColor: "#4c0519", accentColor: "#be123c", fontSize: "sm", spacing: "normal", fontFamily: "sans", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "creative", primaryColor: "#4c0519", accentColor: "#be123c", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
   },
   {
     id: "recruiter-10",
     name: "Medical Practitioner & Doctor",
     description: "Centered layout with clean medical teal accents. Standard clinical residency and physician format.",
     category: "Academic",
-    settings: { template: "classic", primaryColor: "#115e59", accentColor: "#0d9488", fontSize: "sm", spacing: "normal", fontFamily: "sans", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "classic", primaryColor: "#115e59", accentColor: "#0d9488", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
   },
   {
     id: "recruiter-11",
     name: "E-Commerce Growth Manager",
     description: "Modern layouts with warm corporate violet highlights. Built for marketing managers and growth leads.",
     category: "Professional",
-    settings: { template: "modern", primaryColor: "#2e1065", accentColor: "#7c3aed", fontSize: "sm", spacing: "normal", fontFamily: "sans", lineHeight: "relaxed", marginSize: "normal" }
+    settings: { template: "modern", primaryColor: "#2e1065", accentColor: "#7c3aed", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "relaxed", marginSize: "normal" }
   },
   {
     id: "recruiter-12",

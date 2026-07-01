@@ -314,7 +314,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
               {/* Vertical Scrollable Font List */}
               <div className="max-h-[320px] overflow-y-auto border border-dark-border bg-slate-950/50 rounded-xl p-2.5 flex flex-col gap-1 text-slate-200">
                 {Object.entries(FONTS).map(([key, val]) => {
-                  const isSelected = (data.layoutSettings?.fontFamily || "sans") === key;
+                  const isSelected = (data.layoutSettings?.fontFamily || "rubik") === key;
                   
                   // Extract family name and description
                   const parts = val.label.split(" / ");

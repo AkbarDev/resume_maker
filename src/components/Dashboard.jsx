@@ -167,7 +167,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
               accentColor: "#2563eb",
               fontSize: "sm",
               spacing: "normal",
-              fontFamily: "sans"
+              fontFamily: "rubik"
             }
           };
 
@@ -225,7 +225,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
           accentColor: "#2563eb",
           fontSize: "sm",
           spacing: "normal",
-          fontFamily: "sans"
+          fontFamily: "rubik"
         }
       };
 
