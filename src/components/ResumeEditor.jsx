@@ -481,53 +481,38 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
         {activeTab === "sections" && (
           <div className="space-y-4">
             
-            {/* Column Layout togglers */}
+            {/* Template Style Selector */}
             <div className="border border-dark-border bg-slate-950/30 p-4 rounded-xl space-y-3">
-              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Section Layouts</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleLayoutChange("layoutStyle", "single")}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-all cursor-pointer ${
-                    data.layoutSettings?.layoutStyle === "single"
-                      ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                  }`}
-                >
-                  Single Column
-                </button>
-                <button
-                  onClick={() => handleLayoutChange("layoutStyle", "double")}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-all cursor-pointer ${
-                    data.layoutSettings?.layoutStyle === "double"
-                      ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                  }`}
-                >
-                  Double Column
-                </button>
+              <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Template Style</h3>
+              <div className="flex flex-col gap-2">
+                {[
+                  { id: "ivy-league", label: "Ivy League", desc: "Centered serif header, pipe-separated contacts" },
+                  { id: "timeline", label: "Timeline", desc: "Color-coded date badges, bold accents" },
+                  { id: "classic", label: "Classic", desc: "Clean left-aligned, accent border lines" }
+                ].map((tpl) => {
+                  const isSelected = (data.layoutSettings?.template || "classic") === tpl.id;
+                  return (
+                    <button
+                      key={tpl.id}
+                      onClick={() => {
+                        handleLayoutChange("template", tpl.id);
+                        handleLayoutChange("layoutStyle", "single");
+                      }}
+                      className={`w-full py-2.5 px-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                        isSelected
+                          ? "bg-emerald-500/10 border-emerald-400 text-emerald-400 font-bold shadow-sm"
+                          : "bg-slate-900/60 border-dark-border text-slate-300 hover:border-emerald-500/30 hover:text-slate-100"
+                      }`}
+                    >
+                      <div>
+                        <span className="text-xs font-bold block">{tpl.label}</span>
+                        <span className="text-[9px] text-slate-400 font-normal">{tpl.desc}</span>
+                      </div>
+                      {isSelected && <span className="text-emerald-400 text-sm font-bold">✓</span>}
+                    </button>
+                  );
+                })}
               </div>
-
-              {/* Column ratios */}
-              {data.layoutSettings?.layoutStyle === "double" && (
-                <div className="pt-2">
-                  <label className="block text-[10px] font-bold text-slate-400 mb-1.5">Column Spacing Ratio</label>
-                  <div className="flex gap-1.5">
-                    {["50-50", "60-40", "70-30"].map((ratio) => (
-                      <button
-                        key={ratio}
-                        onClick={() => handleLayoutChange("columnRatio", ratio)}
-                        className={`flex-1 py-1 rounded text-[10px] font-bold transition-all cursor-pointer border ${
-                          data.layoutSettings?.columnRatio === ratio
-                            ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
-                            : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
-                        }`}
-                      >
-                        {ratio.replace("-", " : ")}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Toggle Sections Checkboxes */}

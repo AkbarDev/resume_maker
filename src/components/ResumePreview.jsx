@@ -139,7 +139,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     lineHeight = "normal", 
     marginSize = "normal",
     headingStyle = "accent",
-    layoutStyle = "double",
+    layoutStyle = "single",
     columnRatio = "60-40",
     disabledSections = [],
     leftColumnSections = ["summary", "experience", "education", "projects"],
@@ -1868,105 +1868,116 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
       >
         {/* 1. HEADER SECTION (Always Full Width - only on page 1) */}
         {pageNum === 1 && (
-          <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 mb-4 border-b-2" style={borderPrimaryStyle}>
+          <header className={`pb-4 mb-4 ${
+            template === "ivy-league" 
+              ? "text-center border-b-2 border-gray-800" 
+              : template === "timeline"
+                ? "border-b-4 rounded-sm"
+                : "border-b-2"
+          }`} style={template !== "ivy-league" ? borderPrimaryStyle : {}}>
             
-            {/* Left Side: Name and Professional Title */}
-            <div className="flex-1 space-y-1">
-              <h1 className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}>
-                <EditableField
-                  value={personalInfo.firstName}
-                  placeholder="First Name"
-                  onSave={(val) => handlePersonalChange("firstName", val)}
-                  isPrintView={isPrintView}
-                  className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
-                />
-                <span className="mx-1"></span>
-                <EditableField
-                  value={personalInfo.lastName}
-                  placeholder="Last Name"
-                  onSave={(val) => handlePersonalChange("lastName", val)}
-                  isPrintView={isPrintView}
-                  className={`${fontConfig.headingClass} ${sizeConfig.h1} tracking-tight leading-none text-gray-900`}
-                />
-              </h1>
-              
-              <div className="text-[12px] font-bold tracking-wider uppercase mt-1.5" style={accentStyle}>
-                <EditableField
-                  value={personalInfo.title}
-                  placeholder="Professional Title"
-                  onSave={(val) => handlePersonalChange("title", val)}
-                  isPrintView={isPrintView}
-                  className="font-bold text-[12px]"
-                />
-              </div>
+            {/* NAME */}
+            <h1 className={`${fontConfig.headingClass} ${
+              template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+            } tracking-tight leading-none text-gray-900`}>
+              <EditableField
+                value={personalInfo.firstName}
+                placeholder="First Name"
+                onSave={(val) => handlePersonalChange("firstName", val)}
+                isPrintView={isPrintView}
+                className={`${fontConfig.headingClass} ${
+                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+                } tracking-tight leading-none text-gray-900`}
+              />
+              <span className="mx-1"></span>
+              <EditableField
+                value={personalInfo.lastName}
+                placeholder="Last Name"
+                onSave={(val) => handlePersonalChange("lastName", val)}
+                isPrintView={isPrintView}
+                className={`${fontConfig.headingClass} ${
+                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+                } tracking-tight leading-none text-gray-900`}
+              />
+            </h1>
+            
+            {/* TITLE */}
+            <div className={`mt-1.5 ${template === "ivy-league" ? "text-center" : ""}`}>
+              {template === "timeline" ? (
+                /* Timeline: colored badge-style title */
+                <span 
+                  className="inline-block text-white text-[11px] font-bold tracking-wider uppercase px-3 py-1 rounded-sm mt-1"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <EditableField
+                    value={personalInfo.title}
+                    placeholder="Professional Title"
+                    onSave={(val) => handlePersonalChange("title", val)}
+                    isPrintView={isPrintView}
+                    className="font-bold text-[11px] text-white"
+                  />
+                </span>
+              ) : (
+                <div className={`text-[12px] font-bold tracking-wider uppercase ${
+                  template === "ivy-league" ? "text-gray-600 text-center" : ""
+                }`} style={template !== "ivy-league" ? accentStyle : {}}>
+                  <EditableField
+                    value={personalInfo.title}
+                    placeholder="Professional Title"
+                    onSave={(val) => handlePersonalChange("title", val)}
+                    isPrintView={isPrintView}
+                    className="font-bold text-[12px]"
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Right Side: Contact Info Grid (Sleek grid) */}
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10.5px] text-gray-600 font-semibold shrink-0">
-              {/* Email */}
-              <div className="flex items-center gap-1.5">
-                <Mail size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.email}
-                  placeholder="email@example.com"
-                  onSave={(val) => handlePersonalChange("email", val)}
-                  isPrintView={isPrintView}
-                />
-              </div>
-
+            {/* CONTACT INFO */}
+            <div className={`${
+              template === "ivy-league" 
+                ? "flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-2 text-[10.5px] text-gray-600 font-medium" 
+                : template === "timeline"
+                  ? "flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[10.5px] text-gray-600 font-semibold"
+                  : "flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[10.5px] text-gray-600 font-semibold"
+            }`}>
               {/* Phone */}
               <div className="flex items-center gap-1.5">
                 <Phone size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.phone}
-                  placeholder="+1 (555) 012-3456"
-                  onSave={(val) => handlePersonalChange("phone", val)}
-                  isPrintView={isPrintView}
-                />
+                <EditableField value={personalInfo.phone} placeholder="+1 (555) 012-3456" onSave={(val) => handlePersonalChange("phone", val)} isPrintView={isPrintView} />
               </div>
+
+              {template === "ivy-league" && <span className="text-gray-400">|</span>}
+
+              {/* Email */}
+              <div className="flex items-center gap-1.5">
+                <Mail size={11} className="text-gray-400" />
+                <EditableField value={personalInfo.email} placeholder="email@example.com" onSave={(val) => handlePersonalChange("email", val)} isPrintView={isPrintView} />
+              </div>
+
+              {template === "ivy-league" && <span className="text-gray-400">|</span>}
 
               {/* Location */}
               <div className="flex items-center gap-1.5">
                 <MapPin size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.location}
-                  placeholder="City, State"
-                  onSave={(val) => handlePersonalChange("location", val)}
-                  isPrintView={isPrintView}
-                />
+                <EditableField value={personalInfo.location} placeholder="City, State" onSave={(val) => handlePersonalChange("location", val)} isPrintView={isPrintView} />
               </div>
 
               {/* Website */}
               <div className="flex items-center gap-1.5">
                 <Globe size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.website}
-                  placeholder="website.com"
-                  onSave={(val) => handlePersonalChange("website", val)}
-                  isPrintView={isPrintView}
-                />
+                <EditableField value={personalInfo.website} placeholder="website.com" onSave={(val) => handlePersonalChange("website", val)} isPrintView={isPrintView} />
               </div>
 
               {/* LinkedIn */}
               <div className="flex items-center gap-1.5">
                 <Linkedin size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.linkedin}
-                  placeholder="linkedin.com/in/user"
-                  onSave={(val) => handlePersonalChange("linkedin", val)}
-                  isPrintView={isPrintView}
-                />
+                <EditableField value={personalInfo.linkedin} placeholder="linkedin.com/in/user" onSave={(val) => handlePersonalChange("linkedin", val)} isPrintView={isPrintView} />
               </div>
 
               {/* GitHub */}
               <div className="flex items-center gap-1.5">
                 <Github size={11} className="text-gray-400" />
-                <EditableField
-                  value={personalInfo.github}
-                  placeholder="github.com/user"
-                  onSave={(val) => handlePersonalChange("github", val)}
-                  isPrintView={isPrintView}
-                />
+                <EditableField value={personalInfo.github} placeholder="github.com/user" onSave={(val) => handlePersonalChange("github", val)} isPrintView={isPrintView} />
               </div>
             </div>
 

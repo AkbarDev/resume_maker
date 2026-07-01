@@ -1,86 +1,86 @@
 export const CURATED_TEMPLATES = [
   {
-    id: "recruiter-1",
-    name: "Corporate Strategy Partner",
-    description: "Centred serif structure with deep slate formatting. The gold standard for advisory, consulting, and finance directors.",
+    id: "ivy-league-1",
+    name: "Ivy League — Executive",
+    description: "Traditional Ivy League centered header format with clean serif typography. The gold standard for MBAs, consulting, and executive leadership roles.",
     category: "Professional",
-    settings: { template: "classic", primaryColor: "#0f172a", accentColor: "#475569", fontSize: "sm", spacing: "normal", fontFamily: "serif", lineHeight: "relaxed", marginSize: "normal" }
+    settings: { template: "ivy-league", primaryColor: "#1a1a1a", accentColor: "#333333", fontSize: "sm", spacing: "normal", fontFamily: "tinos", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "line" }
   },
   {
-    id: "recruiter-2",
-    name: "Senior Solutions Architect",
-    description: "Modern, timeline-based layout with indigo highlights. Clean and readable structure preferred by tech recruiters.",
-    category: "Tech",
-    settings: { template: "modern", primaryColor: "#1e1b4b", accentColor: "#4f46e5", fontSize: "sm", spacing: "compact", fontFamily: "rubik", lineHeight: "normal", marginSize: "compact" }
+    id: "ivy-league-2",
+    name: "Ivy League — Finance Director",
+    description: "High-density Ivy League layout with compact spacing. Tailored for Wall Street, private equity, and investment banking.",
+    category: "Professional",
+    settings: { template: "ivy-league", primaryColor: "#111827", accentColor: "#1f2937", fontSize: "xs", spacing: "compact", fontFamily: "gelasio", lineHeight: "tight", marginSize: "compact", layoutStyle: "single", headingStyle: "line" }
   },
   {
-    id: "recruiter-3",
-    name: "Creative UX / Product Designer",
-    description: "Double-column sidebar format with rich emerald highlights. Perfect for designers, curators, and creative professionals.",
-    category: "Creative",
-    settings: { template: "creative", primaryColor: "#064e3b", accentColor: "#10b981", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
-  },
-  {
-    id: "recruiter-4",
-    name: "Academic Research Scholar",
-    description: "Serif typography, clean lines, and generous spacing. Perfect for university faculties, scholars, and researchers.",
+    id: "ivy-league-3",
+    name: "Ivy League — Academic Scholar",
+    description: "Generous spacing and clean serif headings. Perfect for university faculties, PhD researchers, and academic publications.",
     category: "Academic",
-    settings: { template: "classic", primaryColor: "#111827", accentColor: "#4b5563", fontSize: "base", spacing: "loose", fontFamily: "serif", lineHeight: "relaxed", marginSize: "loose" }
+    settings: { template: "ivy-league", primaryColor: "#1a1a1a", accentColor: "#4b5563", fontSize: "base", spacing: "loose", fontFamily: "tinos", lineHeight: "relaxed", marginSize: "loose", layoutStyle: "single", headingStyle: "line" }
   },
   {
-    id: "recruiter-5",
-    name: "Investment Banking Associate",
-    description: "High-density, classic centered layout with deep navy details. Tailored for Wall Street recruiters.",
-    category: "Professional",
-    settings: { template: "classic", primaryColor: "#1e1b4b", accentColor: "#312e81", fontSize: "xs", spacing: "compact", fontFamily: "serif", lineHeight: "tight", marginSize: "compact" }
-  },
-  {
-    id: "recruiter-6",
-    name: "Product Operations Lead",
-    description: "Clean modern headings with teal dividers. Ideal for operations managers, PMs, and customer leads.",
-    category: "Professional",
-    settings: { template: "modern", primaryColor: "#115e59", accentColor: "#14b8a6", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
-  },
-  {
-    id: "recruiter-7",
-    name: "Data Analyst & ML Scientist",
-    description: "Minimalist layout with monospace fonts. Excellent for technical developers, analytics, and ML specialists.",
+    id: "timeline-1",
+    name: "Timeline — Data Scientist",
+    description: "Color-coded timeline markers with left-aligned date badges. Modern, scannable layout for tech, analytics, and ML roles.",
     category: "Tech",
-    settings: { template: "minimal", primaryColor: "#111827", accentColor: "#4b5563", fontSize: "sm", spacing: "compact", fontFamily: "mono", lineHeight: "normal", marginSize: "compact" }
+    settings: { template: "timeline", primaryColor: "#0f172a", accentColor: "#2563eb", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "accent" }
   },
   {
-    id: "recruiter-8",
-    name: "Cloud DevOps Consultant",
-    description: "Compact timeline style with slate blue accents. Suited for cloud, infrastructure, and DevOps specialists.",
-    category: "Tech",
-    settings: { template: "modern", primaryColor: "#0f172a", accentColor: "#3b82f6", fontSize: "xs", spacing: "compact", fontFamily: "mono", lineHeight: "tight", marginSize: "compact" }
+    id: "timeline-2",
+    name: "Timeline — Product Manager",
+    description: "Timeline sidebar with teal accents. Clean and structured for operations managers, PMs, and growth leaders.",
+    category: "Professional",
+    settings: { template: "timeline", primaryColor: "#064e3b", accentColor: "#10b981", fontSize: "sm", spacing: "normal", fontFamily: "lato", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "accent" }
   },
   {
-    id: "recruiter-9",
-    name: "Digital Marketing Specialist",
-    description: "Stylish sidebar configuration with rose details. High visual impact layout for creative marketers.",
+    id: "timeline-3",
+    name: "Timeline — UX Designer",
+    description: "Creative timeline layout with vivid orange markers. Eye-catching format for designers, creatives, and strategists.",
     category: "Creative",
-    settings: { template: "creative", primaryColor: "#4c0519", accentColor: "#be123c", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "timeline", primaryColor: "#1a1a1a", accentColor: "#ea580c", fontSize: "sm", spacing: "normal", fontFamily: "raleway", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "accent" }
   },
   {
-    id: "recruiter-10",
-    name: "Medical Practitioner & Doctor",
-    description: "Centered layout with clean medical teal accents. Standard clinical residency and physician format.",
+    id: "classic-1",
+    name: "Classic — Senior Auditor",
+    description: "Clean single-column layout with blue accent lines. ATS-optimized and recruiter-friendly for corporate professionals.",
+    category: "Professional",
+    settings: { template: "classic", primaryColor: "#1e3a5f", accentColor: "#2563eb", fontSize: "sm", spacing: "normal", fontFamily: "arimo", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "line" }
+  },
+  {
+    id: "classic-2",
+    name: "Classic — Sales Executive",
+    description: "Bold headings with a compact, results-driven format. Perfect for B2B sales, account managers, and business development.",
+    category: "Professional",
+    settings: { template: "classic", primaryColor: "#0f172a", accentColor: "#0ea5e9", fontSize: "sm", spacing: "compact", fontFamily: "montserrat", lineHeight: "normal", marginSize: "compact", layoutStyle: "single", headingStyle: "line" }
+  },
+  {
+    id: "classic-3",
+    name: "Classic — Medical Practitioner",
+    description: "Clean clinical format with teal highlights. Standard layout for physicians, nurses, and healthcare professionals.",
     category: "Academic",
-    settings: { template: "classic", primaryColor: "#115e59", accentColor: "#0d9488", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "normal", marginSize: "normal" }
+    settings: { template: "classic", primaryColor: "#115e59", accentColor: "#14b8a6", fontSize: "sm", spacing: "normal", fontFamily: "bitter", lineHeight: "normal", marginSize: "normal", layoutStyle: "single", headingStyle: "line" }
   },
   {
-    id: "recruiter-11",
-    name: "E-Commerce Growth Manager",
-    description: "Modern layouts with warm corporate violet highlights. Built for marketing managers and growth leads.",
-    category: "Professional",
-    settings: { template: "modern", primaryColor: "#2e1065", accentColor: "#7c3aed", fontSize: "sm", spacing: "normal", fontFamily: "rubik", lineHeight: "relaxed", marginSize: "normal" }
-  },
-  {
-    id: "recruiter-12",
-    name: "Brand Storyteller Copywriter",
-    description: "Ample spacing, creative serif, and striking red details. Ideal for content strategists, copywriters, and PR agents.",
+    id: "classic-4",
+    name: "Classic — Marketing Manager",
+    description: "Modern single-column with violet accents. Suitable for digital marketers, brand managers, and growth hackers.",
     category: "Creative",
-    settings: { template: "minimal", primaryColor: "#1f2937", accentColor: "#dc2626", fontSize: "base", spacing: "normal", fontFamily: "serif", lineHeight: "relaxed", marginSize: "normal" }
+    settings: { template: "classic", primaryColor: "#2e1065", accentColor: "#7c3aed", fontSize: "sm", spacing: "normal", fontFamily: "chivo", lineHeight: "relaxed", marginSize: "normal", layoutStyle: "single", headingStyle: "line" }
+  },
+  {
+    id: "classic-5",
+    name: "Classic — DevOps Engineer",
+    description: "Minimal and compact layout with dark slate accents. Built for cloud engineers, infrastructure, and SRE specialists.",
+    category: "Tech",
+    settings: { template: "classic", primaryColor: "#111827", accentColor: "#3b82f6", fontSize: "xs", spacing: "compact", fontFamily: "exo2", lineHeight: "tight", marginSize: "compact", layoutStyle: "single", headingStyle: "line" }
+  },
+  {
+    id: "classic-6",
+    name: "Classic — Copywriter & PR",
+    description: "Elegant serif layout with generous spacing and red accents. Ideal for content strategists, copywriters, and PR agents.",
+    category: "Creative",
+    settings: { template: "classic", primaryColor: "#1f2937", accentColor: "#dc2626", fontSize: "base", spacing: "normal", fontFamily: "volkhov", lineHeight: "relaxed", marginSize: "normal", layoutStyle: "single", headingStyle: "line" }
   }
 ];

@@ -94,8 +94,8 @@ export const INITIAL_RESUME_DATA = {
   ],
   customSections: [],
   layoutSettings: {
-    template: "modern", // classic, modern, minimal, creative
-    layoutStyle: "double", // single, double
+    template: "classic", // ivy-league, timeline, classic
+    layoutStyle: "single", // single
     columnRatio: "60-40", // "50-50", "60-40", "70-30"
     primaryColor: "#0f172a", // Slate 900
     accentColor: "#4f46e5", // Indigo 600
