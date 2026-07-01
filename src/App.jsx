@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { 
-  FileText, Download, RotateCcw, Trash2, Sparkles, Layout, Eye, Settings, Heart, ArrowLeft, RefreshCw 
+  FileText, Download, RotateCcw, Trash2, Sparkles, Layout, Eye, Settings, Heart, ArrowLeft, RefreshCw, Sun, Moon 
 } from "lucide-react";
 import AuthGate from "./components/AuthGate";
 import Dashboard from "./components/Dashboard";
@@ -10,6 +10,16 @@ import AIPanel from "./components/AIPanel";
 import { INITIAL_RESUME_DATA } from "./types/resume";
 
 export default function App() {
+  // Theme state detecting Day (6 AM to 6 PM) vs Night
+  const [theme, setTheme] = useState(() => {
+    const hour = new Date().getHours();
+    return (hour >= 6 && hour < 18) ? "light" : "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.className = theme;
+  }, [theme]);
+
   // 1. Session states
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem("cv_maker_active_user");
@@ -164,7 +174,7 @@ export default function App() {
 
   // Auth gate check
   if (!currentUser) {
-    return <AuthGate onLogin={handleLogin} onGuestLogin={handleGuestLogin} />;
+    return <AuthGate onLogin={handleLogin} onGuestLogin={handleGuestLogin} theme={theme} setTheme={setTheme} />;
   }
 
   // Dashboard check
@@ -179,13 +189,15 @@ export default function App() {
         onRename={handleRenameResume}
         onImportJson={handleImportJson}
         onLogout={handleLogout}
+        theme={theme}
+        setTheme={setTheme}
       />
     );
   }
 
   // Active Workspace view
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col font-inter">
+    <div className={`min-h-screen ${theme} bg-dark-bg text-slate-100 flex flex-col font-inter transition-colors duration-200`}>
       
       {/* Top Header Navigation */}
       <header className="no-print border-b border-dark-border bg-dark-card/90 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-30">
@@ -216,6 +228,19 @@ export default function App() {
         {/* Toolbar Controls */}
         <div className="flex items-center gap-2">
           
+          {/* Day / Night Theme Manual Toggle */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`p-1.5 rounded-lg border cursor-pointer transition-all ${
+              theme === "dark" 
+                ? "border-dark-border bg-slate-900/40 text-yellow-400 hover:text-yellow-300" 
+                : "border-slate-200 bg-white text-indigo-600 hover:bg-slate-100 shadow-sm"
+            }`}
+            title={theme === "dark" ? "Switch to Day Theme" : "Switch to Night Theme"}
+          >
+            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+
           <button
             onClick={() => setIsAIPanelOpen(!isAIPanelOpen)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${

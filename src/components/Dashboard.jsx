@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import { 
   FileText, Plus, Upload, Brain, LogOut, Trash2, Edit2, Calendar, Layout, 
-  ArrowRight, RefreshCw, X, ChevronRight, Download, Sparkles, Search, Sliders 
+  ArrowRight, RefreshCw, X, ChevronRight, Download, Sparkles, Search, Sliders, Sun, Moon
 } from "lucide-react";
 import { INITIAL_RESUME_DATA } from "../types/resume";
 import { CURATED_TEMPLATES } from "../types/templates";
 
-export default function Dashboard({ username, resumes, onCreateNew, onSelect, onDelete, onRename, onImportJson, onLogout }) {
+export default function Dashboard({ username, resumes, onCreateNew, onSelect, onDelete, onRename, onImportJson, onLogout, theme, setTheme }) {
   const [isParsingText, setIsParsingText] = useState(false);
   const [rawResumeText, setRawResumeText] = useState("");
   const [parserError, setParserError] = useState("");
@@ -277,13 +277,28 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
           </div>
         </div>
 
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 border border-dark-border hover:bg-red-500/10 hover:border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-red-400 cursor-pointer transition-colors"
-        >
-          <LogOut size={13} />
-          <span>Sign Out</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Day / Night Theme Toggle */}
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`p-1.5 rounded-lg border cursor-pointer transition-all ${
+              theme === "dark" 
+                ? "border-dark-border bg-slate-900/40 text-yellow-400 hover:text-yellow-300" 
+                : "border-slate-200 bg-white text-indigo-600 hover:bg-slate-100 shadow-sm"
+            }`}
+            title={theme === "dark" ? "Switch to Day Theme" : "Switch to Night Theme"}
+          >
+            {theme === "dark" ? <Sun size={13} /> : <Moon size={13} />}
+          </button>
+
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 border border-dark-border hover:bg-red-500/10 hover:border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-red-400 cursor-pointer transition-colors"
+          >
+            <LogOut size={13} />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Workspace Dashboard Content */}

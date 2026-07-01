@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { User, Lock, Mail, FileText, ArrowRight, UserPlus, AlertCircle } from "lucide-react";
+import { User, Lock, Mail, FileText, ArrowRight, UserPlus, AlertCircle, Sun, Moon } from "lucide-react";
 
-export default function AuthGate({ onLogin, onGuestLogin }) {
+export default function AuthGate({ onLogin, onGuestLogin, theme, setTheme }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -72,7 +72,23 @@ export default function AuthGate({ onLogin, onGuestLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex items-center justify-center p-6 font-inter">
+    <div className={`min-h-screen ${theme} bg-dark-bg text-slate-100 flex items-center justify-center p-6 font-inter transition-colors duration-200`}>
+      
+      {/* Theme manual switch toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className={`p-2 rounded-xl border cursor-pointer transition-all ${
+            theme === "dark" 
+              ? "border-dark-border bg-slate-900/40 text-yellow-400 hover:text-yellow-300" 
+              : "border-slate-200 bg-white text-indigo-600 hover:bg-slate-100 shadow-sm"
+          }`}
+          title={theme === "dark" ? "Switch to Day Theme" : "Switch to Night Theme"}
+        >
+          {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+      </div>
+
       {/* Background glowing effects */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-600/10 blur-[120px] pointer-events-none" />

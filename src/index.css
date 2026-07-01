@@ -1,6 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Lato:wght@300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
+:root {
+  --color-page-bg: #f8fafc;
+  --color-page-text: #0f172a;
+  --color-panel-bg: #ffffff;
+  --color-panel-border: #e2e8f0;
+  --color-input-bg: #f1f5f9;
+  --color-input-text: #0f172a;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-workspace-bg: #cbd5e1;
+  --color-card-darker: #f8fafc;
+}
+
+.dark {
+  --color-page-bg: #0b0f19;
+  --color-page-text: #cbd5e1;
+  --color-panel-bg: #151b2c;
+  --color-panel-border: #232c45;
+  --color-input-bg: #0b0f19;
+  --color-input-text: #ffffff;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-workspace-bg: #020617;
+  --color-card-darker: #0b0f19;
+}
+
 @theme {
   --font-inter: "Inter", sans-serif;
   --font-outfit: "Outfit", sans-serif;
@@ -12,9 +40,9 @@
   
   --color-brand-primary: #6366f1;
   --color-brand-secondary: #4f46e5;
-  --color-dark-bg: #0b0f19;
-  --color-dark-card: #151b2c;
-  --color-dark-border: #232c45;
+  --color-dark-bg: var(--color-page-bg);
+  --color-dark-card: var(--color-panel-bg);
+  --color-dark-border: var(--color-panel-border);
 }
 
 /* Custom scrollbars */
@@ -82,8 +110,7 @@
     break-inside: avoid;
   }
   
-  /* Reset colors to standard black/white print friendly if requested,
-     but we preserve background-colors/borders using print-color-adjust */
+  /* Reset colors to standard print friendly colors */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -145,4 +172,94 @@
 
 .pie-segment:hover {
   filter: brightness(1.1);
+}
+
+/* General day-to-day light theme overrides */
+.light {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Override utility classes dynamically for Light Theme */
+.light .bg-dark-card\/50 {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.light .bg-dark-card\/60 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.light .bg-dark-card\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.light .bg-dark-card {
+  background-color: #ffffff !important;
+}
+
+.light .border-dark-border\/80,
+.light .border-dark-border\/70,
+.light .border-dark-border\/30,
+.light .border-dark-border\/20,
+.light .border-dark-border {
+  border-color: #e2e8f0 !important;
+}
+
+.light .bg-slate-950\/60 {
+  background-color: rgba(241, 245, 249, 0.75) !important;
+}
+
+.light .bg-slate-900\/60,
+.light .bg-slate-900\/80,
+.light .bg-slate-900\/40,
+.light .bg-slate-900\/30,
+.light .bg-slate-900 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.light .bg-slate-950\/30,
+.light .bg-slate-950\/20,
+.light .bg-slate-950\/40,
+.light .bg-slate-950 {
+  background-color: #e2e8f0 !important;
+}
+
+.light .text-slate-100,
+.light .text-white {
+  color: #0f172a !important;
+}
+
+.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+.light .text-slate-300,
+.light .text-slate-400,
+.light .text-gray-400 {
+  color: #475569 !important;
+}
+
+.light .text-slate-500,
+.light .text-gray-500 {
+  color: #64748b !important;
+}
+
+/* Inputs and interactive elements in light theme */
+.light input[type="text"],
+.light input[type="password"],
+.light input[type="email"],
+.light select,
+.light textarea {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94a3b8 !important;
 }
