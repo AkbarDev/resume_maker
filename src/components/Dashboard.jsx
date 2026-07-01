@@ -259,7 +259,7 @@ Return ONLY the valid JSON block. Do not include markdown code block syntax.`;
   });
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col font-inter">
+    <div className={`min-h-screen ${theme} bg-dark-bg text-slate-100 flex flex-col font-inter transition-colors duration-200`}>
       {/* Background radial highlight */}
       <div className="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
 

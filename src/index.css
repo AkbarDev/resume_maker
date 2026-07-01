@@ -216,6 +216,9 @@
 .light .bg-slate-900\/80,
 .light .bg-slate-900\/40,
 .light .bg-slate-900\/30,
+.light .bg-slate-900\/20,
+.light .bg-slate-900\/10,
+.light .bg-slate-900\/5,
 .light .bg-slate-900 {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
@@ -263,3 +266,19 @@
 .light textarea::placeholder {
   color: #94a3b8 !important;
 }
+
+/* Force body and container backgrounds based on class active state */
+.light,
+.light body,
+.light .bg-dark-bg {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.dark,
+.dark body,
+.dark .bg-dark-bg {
+  background-color: #0b0f19 !important;
+  color: #cbd5e1 !important;
+}
+
