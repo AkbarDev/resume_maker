@@ -170,8 +170,8 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
           onClick={() => setActiveTab("design")}
           className={`flex-1 py-3 px-1 text-xs font-bold border-b-2 tracking-wide uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "design"
-              ? "border-indigo-500 text-white bg-indigo-500/5"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              ? "border-indigo-500 text-indigo-400 bg-indigo-600/10"
+              : "border-transparent text-slate-400 hover:text-indigo-400 hover:font-extrabold"
           }`}
         >
           <Palette size={13} />
@@ -181,8 +181,8 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
           onClick={() => setActiveTab("sections")}
           className={`flex-1 py-3 px-1 text-xs font-bold border-b-2 tracking-wide uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "sections"
-              ? "border-indigo-500 text-white bg-indigo-500/5"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              ? "border-indigo-500 text-indigo-400 bg-indigo-600/10"
+              : "border-transparent text-slate-400 hover:text-indigo-400 hover:font-extrabold"
           }`}
         >
           <Sliders size={13} />
@@ -192,8 +192,8 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
           onClick={() => setActiveTab("aiSettings")}
           className={`flex-1 py-3 px-1 text-xs font-bold border-b-2 tracking-wide uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === "aiSettings"
-              ? "border-indigo-500 text-white bg-indigo-500/5"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              ? "border-indigo-500 text-indigo-400 bg-indigo-600/10"
+              : "border-transparent text-slate-400 hover:text-indigo-400 hover:font-extrabold"
           }`}
         >
           <Settings size={13} />
@@ -219,14 +219,14 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       handleLayoutChange("primaryColor", preset.primary);
                       handleLayoutChange("accentColor", preset.accent);
                     }}
-                    className="p-1 rounded-lg border border-dark-border bg-slate-900/60 hover:bg-slate-800 hover:border-slate-600 transition-colors flex flex-col items-center gap-1 cursor-pointer"
+                    className="p-1 rounded-lg border border-dark-border bg-slate-900/60 hover:bg-slate-800 hover:border-slate-600 hover:font-bold transition-all flex flex-col items-center gap-1 cursor-pointer group"
                     title={preset.name}
                   >
                     <div className="flex gap-0.5">
                       <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: preset.primary }} />
                       <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: preset.accent }} />
                     </div>
-                    <span className="text-[8px] text-slate-400 truncate max-w-full text-center">{preset.name.split(" ")[0]}</span>
+                    <span className="text-[8px] text-slate-400 group-hover:text-slate-200 truncate max-w-full text-center">{preset.name.split(" ")[0]}</span>
                   </button>
                 ))}
               </div>
@@ -270,8 +270,8 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     onClick={() => handleLayoutChange("fontFamily", key)}
                     className={`py-2 px-2.5 rounded-xl border text-xs text-center transition-all cursor-pointer ${
                       data.layoutSettings?.fontFamily === key
-                        ? "bg-indigo-600/15 border-indigo-500 text-white font-bold"
-                        : "bg-slate-900/60 border-dark-border text-slate-300 hover:border-slate-600"
+                        ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold shadow-sm"
+                        : "bg-slate-900/60 border-dark-border text-slate-300 hover:border-indigo-500/20 hover:font-bold hover:text-slate-100"
                     }`}
                   >
                     <span className="block font-medium">{value.label.split(" / ")[0]}</span>
@@ -296,10 +296,10 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     <button
                       key={sz}
                       onClick={() => handleLayoutChange("marginSize", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-colors cursor-pointer uppercase ${
+                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
                         data.layoutSettings?.marginSize === sz
-                          ? "bg-slate-700 text-white"
-                          : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                       }`}
                     >
                       {sz}
@@ -319,10 +319,10 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     <button
                       key={sz}
                       onClick={() => handleLayoutChange("spacing", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-colors cursor-pointer uppercase ${
+                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
                         data.layoutSettings?.spacing === sz
-                          ? "bg-slate-700 text-white"
-                          : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                       }`}
                     >
                       {sz}
@@ -342,10 +342,10 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     <button
                       key={sz}
                       onClick={() => handleLayoutChange("fontSize", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-colors cursor-pointer uppercase ${
+                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
                         data.layoutSettings?.fontSize === sz
-                          ? "bg-slate-700 text-white"
-                          : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                       }`}
                     >
                       {sz}
@@ -365,10 +365,10 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     <button
                       key={sz}
                       onClick={() => handleLayoutChange("lineHeight", sz)}
-                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-colors cursor-pointer uppercase ${
+                      className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer uppercase border ${
                         data.layoutSettings?.lineHeight === sz
-                          ? "bg-slate-700 text-white"
-                          : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                          ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                          : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                       }`}
                     >
                       {sz}
@@ -393,8 +393,8 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                     onClick={() => handleLayoutChange("headingStyle", style.id)}
                     className={`py-2 px-2 rounded-xl border text-[10px] font-bold text-center transition-all cursor-pointer ${
                       data.layoutSettings?.headingStyle === style.id
-                        ? "bg-indigo-600/15 border-indigo-500 text-white"
-                        : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-slate-600"
+                        ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                        : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                     }`}
                   >
                     {style.label}
@@ -416,20 +416,20 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleLayoutChange("layoutStyle", "single")}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-all cursor-pointer ${
                     data.layoutSettings?.layoutStyle === "single"
-                      ? "bg-indigo-600/15 border-indigo-500 text-white"
-                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:bg-slate-800"
+                      ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                   }`}
                 >
                   Single Column
                 </button>
                 <button
                   onClick={() => handleLayoutChange("layoutStyle", "double")}
-                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer ${
+                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold tracking-wide uppercase transition-all cursor-pointer ${
                     data.layoutSettings?.layoutStyle === "double"
-                      ? "bg-indigo-600/15 border-indigo-500 text-white"
-                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:bg-slate-800"
+                      ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                      : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                   }`}
                 >
                   Double Column
@@ -445,10 +445,10 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       <button
                         key={ratio}
                         onClick={() => handleLayoutChange("columnRatio", ratio)}
-                        className={`flex-1 py-1 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        className={`flex-1 py-1 rounded text-[10px] font-bold transition-all cursor-pointer border ${
                           data.layoutSettings?.columnRatio === ratio
-                            ? "bg-slate-700 text-white"
-                            : "bg-slate-900 text-slate-400 hover:bg-slate-800"
+                            ? "bg-indigo-600/10 border-indigo-500/30 text-indigo-400 font-bold"
+                            : "bg-slate-900/60 border-dark-border text-slate-400 hover:border-indigo-500/20 hover:font-bold hover:text-slate-200"
                         }`}
                       >
                         {ratio.replace("-", " : ")}
