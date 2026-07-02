@@ -144,7 +144,8 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
     disabledSections = [],
     leftColumnSections = ["summary", "experience", "education", "projects"],
     rightColumnSections = ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
-    sectionOrder = ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
+    sectionOrder = ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
+    experienceLayout = "single-row"
   } = layoutSettings;
 
   // Simple Toggle Switch
@@ -361,6 +362,17 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
   // Render section decoration based on header style selection
   const renderSectionHeader = (title) => {
+    if (headingStyle === "top-line") {
+      return (
+        <div className="mb-3.5">
+          <div className="w-full border-t-[1.5px] border-gray-800 mb-2.5"></div>
+          <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-widest text-center text-gray-900 font-bold capitalize`}>
+            {title === "Professional Summary" ? "Summary" : title === "Work Experience" ? "Experience" : title}
+          </h2>
+        </div>
+      );
+    }
+
     if (headingStyle === "clean") {
       return (
         <h2 className={`${fontConfig.headingClass} ${sizeConfig.h2} tracking-wider text-gray-800 uppercase pb-1 mb-2 font-black`}>
@@ -480,71 +492,141 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 }}
               ]}
             >
-              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
-                <span>
-                  {!exp.hideTitle && (
-                    <EditableField
-                      value={exp.role}
-                      placeholder="Software Engineer"
-                      onSave={(val) => {
-                        const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
-                        onChange({ ...data, experience: updated });
-                      }}
-                      isPrintView={isPrintView}
-                      className="font-bold text-gray-900"
-                    />
+              {experienceLayout === "double-row" ? (
+                <>
+                  <div className="flex justify-between items-baseline text-xs mb-0.5">
+                    {!exp.hideCompany && (
+                      <EditableField
+                        value={exp.company}
+                        placeholder="Tech Corp"
+                        onSave={(val) => {
+                          const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
+                          onChange({ ...data, experience: updated });
+                        }}
+                        isPrintView={isPrintView}
+                        className="font-normal text-gray-800 text-[13px]"
+                      />
+                    )}
+                    {!exp.hideLocation && (
+                      <div className="text-gray-700 text-[11px]">
+                        <EditableField
+                          value={exp.location}
+                          placeholder="San Francisco, CA"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-baseline text-xs mb-1.5">
+                    {!exp.hideTitle && (
+                      <EditableField
+                        value={exp.role}
+                        placeholder="Software Engineer"
+                        onSave={(val) => {
+                          const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
+                          onChange({ ...data, experience: updated });
+                        }}
+                        isPrintView={isPrintView}
+                        className="font-bold text-gray-900 text-[12px]"
+                      />
+                    )}
+                    {!exp.hideDate && (
+                      <span className="text-[11px] text-gray-600 tracking-wide shrink-0">
+                        <EditableField
+                          value={exp.startDate}
+                          placeholder="2022-01"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                        <span className="mx-1">–</span>
+                        <EditableField
+                          value={exp.endDate}
+                          placeholder="Present"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
+                    <span>
+                      {!exp.hideTitle && (
+                        <EditableField
+                          value={exp.role}
+                          placeholder="Software Engineer"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, role: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                          className="font-bold text-gray-900"
+                        />
+                      )}
+                      {!exp.hideTitle && !exp.hideCompany && <span className="font-normal text-gray-400 mx-1.5">|</span>}
+                      {!exp.hideCompany && (
+                        <EditableField
+                          value={exp.company}
+                          placeholder="Tech Corp"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                          className="font-medium text-gray-600"
+                        />
+                      )}
+                    </span>
+                    {!exp.hideDate && (
+                      <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase whitespace-nowrap" style={accentStyle}>
+                        <EditableField
+                          value={exp.startDate}
+                          placeholder="2022-01"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                        <span className="mx-1">–</span>
+                        <EditableField
+                          value={exp.endDate}
+                          placeholder="Present"
+                          onSave={(val) => {
+                            const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
+                            onChange({ ...data, experience: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </span>
+                    )}
+                  </div>
+                  {!exp.hideLocation && (
+                    <div className="text-gray-500 italic text-[10px] mb-1 font-medium">
+                      <EditableField
+                        value={exp.location}
+                        placeholder="San Francisco, CA"
+                        onSave={(val) => {
+                          const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
+                          onChange({ ...data, experience: updated });
+                        }}
+                        isPrintView={isPrintView}
+                      />
+                    </div>
                   )}
-                  {!exp.hideTitle && !exp.hideCompany && <span className="font-normal text-gray-400 mx-1.5">|</span>}
-                  {!exp.hideCompany && (
-                    <EditableField
-                      value={exp.company}
-                      placeholder="Tech Corp"
-                      onSave={(val) => {
-                        const updated = experience.map((e, i) => i === idx ? { ...e, company: val } : e);
-                        onChange({ ...data, experience: updated });
-                      }}
-                      isPrintView={isPrintView}
-                      className="font-medium text-gray-600"
-                    />
-                  )}
-                </span>
-                {!exp.hideDate && (
-                  <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase whitespace-nowrap" style={accentStyle}>
-                    <EditableField
-                      value={exp.startDate}
-                      placeholder="2022-01"
-                      onSave={(val) => {
-                        const updated = experience.map((e, i) => i === idx ? { ...e, startDate: val } : e);
-                        onChange({ ...data, experience: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
-                    <span className="mx-1">–</span>
-                    <EditableField
-                      value={exp.endDate}
-                      placeholder="Present"
-                      onSave={(val) => {
-                        const updated = experience.map((e, i) => i === idx ? { ...e, endDate: val } : e);
-                        onChange({ ...data, experience: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
-                  </span>
-                )}
-              </div>
-
-              {!exp.hideLocation && (
-                <div className="text-gray-500 italic text-[10px] mb-1 font-medium">
-                  <EditableField
-                    value={exp.location}
-                    placeholder="San Francisco, CA"
-                    onSave={(val) => {
-                      const updated = experience.map((e, i) => i === idx ? { ...e, location: val } : e);
-                      onChange({ ...data, experience: updated });
-                    }}
-                    isPrintView={isPrintView}
-                  />
-                </div>
+                </>
               )}
 
               {/* Description Edit (clicking opens textarea to edit raw bullet list) */}
@@ -639,74 +721,150 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 }}
               ]}
             >
-              <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
-                <span>
-                  {!edu.hideTitle && (
-                    <EditableField
-                      value={edu.degree}
-                      placeholder="B.S. Computer Science"
-                      onSave={(val) => {
-                        const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
-                        onChange({ ...data, education: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
-                  )}
-                  {!edu.hideTitle && edu.fieldOfStudy && (
-                    <>
-                      <span className="font-normal text-gray-400 mx-1">in</span>
+              {experienceLayout === "double-row" ? (
+                <>
+                  <div className="flex justify-between items-baseline text-xs mb-0.5">
+                    {!edu.hideCompany ? (
                       <EditableField
-                        value={edu.fieldOfStudy}
-                        placeholder="Field of Study"
+                        value={edu.institution}
+                        placeholder="University Name"
                         onSave={(val) => {
-                          const updated = education.map((e, i) => i === idx ? { ...e, fieldOfStudy: val } : e);
+                          const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
                           onChange({ ...data, education: updated });
                         }}
                         isPrintView={isPrintView}
+                        className="font-normal text-gray-800 text-[13px]"
                       />
-                    </>
-                  )}
-                </span>
-                {!edu.hideDate && (
-                  <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
-                    <EditableField
-                      value={edu.graduationDate}
-                      placeholder="2020-05"
-                      onSave={(val) => {
-                        const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
-                        onChange({ ...data, education: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
-                  </span>
-                )}
-              </div>
+                    ) : <span />}
+                    {!edu.hideLocation && (
+                      <div className="text-gray-700 text-[11px]">
+                        <EditableField
+                          value={edu.location}
+                          placeholder="Berkeley, CA"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-between items-baseline text-xs mb-1">
+                    <span className="font-bold text-gray-900 text-[12px]">
+                      {!edu.hideTitle && (
+                        <EditableField
+                          value={edu.degree}
+                          placeholder="B.S. Computer Science"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      )}
+                      {!edu.hideTitle && edu.fieldOfStudy && (
+                        <>
+                          <span className="font-normal text-gray-500 mx-1">in</span>
+                          <EditableField
+                            value={edu.fieldOfStudy}
+                            placeholder="Field of Study"
+                            onSave={(val) => {
+                              const updated = education.map((e, i) => i === idx ? { ...e, fieldOfStudy: val } : e);
+                              onChange({ ...data, education: updated });
+                            }}
+                            isPrintView={isPrintView}
+                          />
+                        </>
+                      )}
+                    </span>
+                    {!edu.hideDate && (
+                      <span className="text-[11px] text-gray-600 tracking-wide shrink-0">
+                        <EditableField
+                          value={edu.graduationDate}
+                          placeholder="2020-05"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-baseline font-bold text-gray-900 text-xs">
+                    <span>
+                      {!edu.hideTitle && (
+                        <EditableField
+                          value={edu.degree}
+                          placeholder="B.S. Computer Science"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, degree: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      )}
+                      {!edu.hideTitle && edu.fieldOfStudy && (
+                        <>
+                          <span className="font-normal text-gray-400 mx-1">in</span>
+                          <EditableField
+                            value={edu.fieldOfStudy}
+                            placeholder="Field of Study"
+                            onSave={(val) => {
+                              const updated = education.map((e, i) => i === idx ? { ...e, fieldOfStudy: val } : e);
+                              onChange({ ...data, education: updated });
+                            }}
+                            isPrintView={isPrintView}
+                          />
+                        </>
+                      )}
+                    </span>
+                    {!edu.hideDate && (
+                      <span className="text-[10px] font-semibold tracking-wider shrink-0 uppercase" style={accentStyle}>
+                        <EditableField
+                          value={edu.graduationDate}
+                          placeholder="2020-05"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, graduationDate: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      </span>
+                    )}
+                  </div>
 
-              {(!edu.hideCompany || !edu.hideLocation) && (
-                <div className="flex justify-between text-gray-600 italic text-[10px] font-medium">
-                  {!edu.hideCompany ? (
-                    <EditableField
-                      value={edu.institution}
-                      placeholder="University Name"
-                      onSave={(val) => {
-                        const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
-                        onChange({ ...data, education: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
-                  ) : <span />}
-                  {!edu.hideLocation && (
-                    <EditableField
-                      value={edu.location}
-                      placeholder="Berkeley, CA"
-                      onSave={(val) => {
-                        const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
-                        onChange({ ...data, education: updated });
-                      }}
-                      isPrintView={isPrintView}
-                    />
+                  {(!edu.hideCompany || !edu.hideLocation) && (
+                    <div className="flex justify-between text-gray-600 italic text-[10px] font-medium">
+                      {!edu.hideCompany ? (
+                        <EditableField
+                          value={edu.institution}
+                          placeholder="University Name"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, institution: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      ) : <span />}
+                      {!edu.hideLocation && (
+                        <EditableField
+                          value={edu.location}
+                          placeholder="Berkeley, CA"
+                          onSave={(val) => {
+                            const updated = education.map((e, i) => i === idx ? { ...e, location: val } : e);
+                            onChange({ ...data, education: updated });
+                          }}
+                          isPrintView={isPrintView}
+                        />
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
 
               {!edu.hideDescription && (
@@ -1870,16 +2028,18 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
         {/* 1. HEADER SECTION (Always Full Width - only on page 1) */}
         {pageNum === 1 && (
           <header className={`pb-4 mb-4 ${
-            template === "ivy-league" 
-              ? "text-center border-b-2 border-gray-800" 
+            (template === "ivy-league" || template === "executive") 
+              ? "text-center" 
               : template === "timeline"
                 ? "border-b-4 rounded-sm"
                 : "border-b-2"
-          }`} style={template !== "ivy-league" ? borderPrimaryStyle : {}}>
+          }`} style={(template !== "ivy-league" && template !== "executive") ? borderPrimaryStyle : {}}>
             
             {/* NAME */}
             <h1 className={`${fontConfig.headingClass} ${
-              template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+              template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" 
+              : template === "executive" ? "text-[26px] font-black tracking-wide"
+              : sizeConfig.h1
             } tracking-tight leading-none text-gray-900`}>
               <EditableField
                 value={personalInfo.firstName}
@@ -1887,7 +2047,9 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 onSave={(val) => handlePersonalChange("firstName", val)}
                 isPrintView={isPrintView}
                 className={`${fontConfig.headingClass} ${
-                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" 
+                  : template === "executive" ? "text-[26px] font-black tracking-wide"
+                  : sizeConfig.h1
                 } tracking-tight leading-none text-gray-900`}
               />
               <span className="mx-1"></span>
@@ -1897,13 +2059,15 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 onSave={(val) => handlePersonalChange("lastName", val)}
                 isPrintView={isPrintView}
                 className={`${fontConfig.headingClass} ${
-                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" : sizeConfig.h1
+                  template === "ivy-league" ? "text-[28px] uppercase tracking-[0.25em]" 
+                  : template === "executive" ? "text-[26px] font-black tracking-wide"
+                  : sizeConfig.h1
                 } tracking-tight leading-none text-gray-900`}
               />
             </h1>
             
             {/* TITLE */}
-            <div className={`mt-1.5 ${template === "ivy-league" ? "text-center" : ""}`}>
+            <div className={`mt-1.5 ${(template === "ivy-league" || template === "executive") ? "text-center" : ""}`}>
               {template === "timeline" ? (
                 /* Timeline: colored badge-style title */
                 <span 
@@ -1920,14 +2084,16 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
                 </span>
               ) : (
                 <div className={`text-[12px] font-bold tracking-wider uppercase ${
-                  template === "ivy-league" ? "text-gray-600 text-center" : ""
-                }`} style={template !== "ivy-league" ? accentStyle : {}}>
+                  template === "ivy-league" ? "text-gray-600 text-center" 
+                  : template === "executive" ? "text-gray-500 font-normal normal-case text-[14px]"
+                  : ""
+                }`} style={(template !== "ivy-league" && template !== "executive") ? accentStyle : {}}>
                   <EditableField
                     value={personalInfo.title}
                     placeholder="Professional Title"
                     onSave={(val) => handlePersonalChange("title", val)}
                     isPrintView={isPrintView}
-                    className="font-bold text-[12px]"
+                    className={`font-bold text-[12px] ${template === "executive" ? "font-normal normal-case text-[14px]" : ""}`}
                   />
                 </div>
               )}
@@ -1935,7 +2101,7 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
 
             {/* CONTACT INFO */}
             <div className={`${
-              template === "ivy-league" 
+              (template === "ivy-league" || template === "executive")
                 ? "flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-2 text-[10.5px] text-gray-600 font-medium" 
                 : template === "timeline"
                   ? "flex flex-wrap items-center gap-x-3 gap-y-1 mt-2.5 text-[10.5px] text-gray-600 font-semibold"
@@ -1943,41 +2109,52 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
             }`}>
               {/* Phone */}
               <div className="flex items-center gap-1.5">
-                <Phone size={11} className="text-gray-400" />
+                {template !== "executive" && <Phone size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.phone} placeholder="+1 (555) 012-3456" onSave={(val) => handlePersonalChange("phone", val)} isPrintView={isPrintView} />
               </div>
 
               {template === "ivy-league" && <span className="text-gray-400">|</span>}
+              {template === "executive" && <span className="text-gray-500 font-bold">•</span>}
 
               {/* Email */}
               <div className="flex items-center gap-1.5">
-                <Mail size={11} className="text-gray-400" />
+                {template !== "executive" && <Mail size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.email} placeholder="email@example.com" onSave={(val) => handlePersonalChange("email", val)} isPrintView={isPrintView} />
               </div>
 
               {template === "ivy-league" && <span className="text-gray-400">|</span>}
+              {template === "executive" && <span className="text-gray-500 font-bold">•</span>}
 
               {/* Location */}
               <div className="flex items-center gap-1.5">
-                <MapPin size={11} className="text-gray-400" />
+                {template !== "executive" && <MapPin size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.location} placeholder="City, State" onSave={(val) => handlePersonalChange("location", val)} isPrintView={isPrintView} />
               </div>
 
+              {template === "ivy-league" && <span className="text-gray-400">|</span>}
+              {template === "executive" && <span className="text-gray-500 font-bold">•</span>}
+
               {/* Website */}
               <div className="flex items-center gap-1.5">
-                <Globe size={11} className="text-gray-400" />
+                {template !== "executive" && <Globe size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.website} placeholder="website.com" onSave={(val) => handlePersonalChange("website", val)} isPrintView={isPrintView} />
               </div>
 
+              {template === "ivy-league" && <span className="text-gray-400">|</span>}
+              {template === "executive" && <span className="text-gray-500 font-bold">•</span>}
+
               {/* LinkedIn */}
               <div className="flex items-center gap-1.5">
-                <Linkedin size={11} className="text-gray-400" />
+                {template !== "executive" && <Linkedin size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.linkedin} placeholder="linkedin.com/in/user" onSave={(val) => handlePersonalChange("linkedin", val)} isPrintView={isPrintView} />
               </div>
 
+              {template === "ivy-league" && <span className="text-gray-400">|</span>}
+              {template === "executive" && <span className="text-gray-500 font-bold">•</span>}
+
               {/* GitHub */}
               <div className="flex items-center gap-1.5">
-                <Github size={11} className="text-gray-400" />
+                {template !== "executive" && <Github size={11} className="text-gray-400" />}
                 <EditableField value={personalInfo.github} placeholder="github.com/user" onSave={(val) => handlePersonalChange("github", val)} isPrintView={isPrintView} />
               </div>
             </div>

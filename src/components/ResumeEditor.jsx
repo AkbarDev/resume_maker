@@ -486,6 +486,7 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
               <h3 className="text-xs font-bold tracking-wide uppercase text-slate-400">Template Style</h3>
               <div className="flex flex-col gap-2">
                 {[
+                  { id: "executive", label: "Executive", desc: "Centered top-line headers, spacious layout" },
                   { id: "ivy-league", label: "Ivy League", desc: "Centered serif header, pipe-separated contacts" },
                   { id: "timeline", label: "Timeline", desc: "Color-coded date badges, bold accents" },
                   { id: "classic", label: "Classic", desc: "Clean left-aligned, accent border lines" }
@@ -497,6 +498,16 @@ export default function ResumeEditor({ data, onChange, onAIEnhance }) {
                       onClick={() => {
                         handleLayoutChange("template", tpl.id);
                         handleLayoutChange("layoutStyle", "single");
+                        if (tpl.id === "executive") {
+                          handleLayoutChange("headingStyle", "top-line");
+                          handleLayoutChange("experienceLayout", "double-row");
+                          handleLayoutChange("marginSize", "loose");
+                        } else {
+                          handleLayoutChange("experienceLayout", "single-row");
+                          if (tpl.id === "ivy-league") handleLayoutChange("headingStyle", "line");
+                          if (tpl.id === "timeline") handleLayoutChange("headingStyle", "accent");
+                          if (tpl.id === "classic") handleLayoutChange("headingStyle", "clean");
+                        }
                       }}
                       className={`w-full py-2.5 px-3 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                         isSelected

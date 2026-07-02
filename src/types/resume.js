@@ -107,7 +107,8 @@ export const INITIAL_RESUME_DATA = {
     headingStyle: "accent", // line, accent, block, clean
     leftColumnSections: ["summary", "experience", "education", "projects"],
     rightColumnSections: ["skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
-    sectionOrder: ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"]
+    sectionOrder: ["summary", "experience", "education", "projects", "skills", "certifications", "strengths", "languages", "achievements", "passions", "books", "quotes", "dayInLife"],
+    experienceLayout: "single-row"
   }
 };
 

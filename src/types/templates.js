@@ -1,5 +1,26 @@
 export const CURATED_TEMPLATES = [
   {
+    id: "executive-1",
+    name: "Executive — Enhancv Classic",
+    description: "Centered headers with top border lines and spacious double-row layout for experience. Ideal for executives and mid-level professionals.",
+    category: "Professional",
+    settings: { template: "executive", primaryColor: "#1a1a1a", accentColor: "#333333", fontSize: "sm", spacing: "loose", fontFamily: "rubik", lineHeight: "normal", marginSize: "loose", layoutStyle: "single", headingStyle: "top-line", experienceLayout: "double-row" }
+  },
+  {
+    id: "executive-2",
+    name: "Executive — Minimalist Director",
+    description: "Crisp centered structure with a sophisticated aesthetic. Uses spacious padding and clear hierarchical typography.",
+    category: "Professional",
+    settings: { template: "executive", primaryColor: "#111827", accentColor: "#1f2937", fontSize: "base", spacing: "loose", fontFamily: "lato", lineHeight: "relaxed", marginSize: "loose", layoutStyle: "single", headingStyle: "top-line", experienceLayout: "double-row" }
+  },
+  {
+    id: "executive-3",
+    name: "Executive — Corporate Analyst",
+    description: "Dense but highly readable executive template for analytical roles. Double-row job headers ensure maximum scannability.",
+    category: "Creative",
+    settings: { template: "executive", primaryColor: "#0f172a", accentColor: "#475569", fontSize: "xs", spacing: "normal", fontFamily: "chivo", lineHeight: "tight", marginSize: "normal", layoutStyle: "single", headingStyle: "top-line", experienceLayout: "double-row" }
+  },
+  {
     id: "ivy-league-1",
     name: "Ivy League — Executive",
     description: "Traditional Ivy League centered header format with clean serif typography. The gold standard for MBAs, consulting, and executive leadership roles.",
