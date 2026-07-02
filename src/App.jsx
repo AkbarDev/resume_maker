@@ -511,7 +511,7 @@ export default function App() {
             <span>A4 Portrait Layout</span>
           </div>
           
-          <div className="w-[210mm] max-w-full shadow-2xl shadow-black/40 border border-slate-800/50 rounded-lg overflow-hidden shrink-0">
+          <div className="w-[210mm] max-w-full shadow-2xl shadow-black/40 border border-slate-800/50 rounded-lg shrink-0">
             <ResumePreview 
               data={activeResume} 
               onChange={handleResumeChange}
