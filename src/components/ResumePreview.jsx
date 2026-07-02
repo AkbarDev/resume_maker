@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Globe, ExternalLink, Plus, Trash2, ArrowUp, ArrowDown, Sparkles, Calendar, Settings } from "lucide-react";
+import { Mail, Phone, MapPin, Globe, ExternalLink, Plus, Trash2, ArrowUp, ArrowDown, Sparkles, Calendar, Settings, Bot, Wand2, Smile, Send, X, Loader2 } from "lucide-react";
 import { FONTS, SIZES } from "../types/resume";
 
 // Simple Inline-Editable Component
@@ -168,8 +168,160 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
   // Helper to wrap items with click-to-edit box, green outline, and floating toolbar controls
   const EditorItemBox = ({ id, type, index, itemsArray = [], onAdd, onDelete, toggles = [], children }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isAiOpen, setIsAiOpen] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiResult, setAiResult] = useState("");
+    const [customPrompt, setCustomPrompt] = useState("");
+    const [aiError, setAiError] = useState("");
+    const [showHfSettings, setShowHfSettings] = useState(false);
+
+    const [token, setToken] = useState(() => localStorage.getItem("hf_token") || "");
+    const [isDemo, setIsDemo] = useState(() => localStorage.getItem("hf_is_demo") !== "false");
+    const [selectedModel, setSelectedModel] = useState("Qwen/Qwen2.5-7B-Instruct");
+
+    const saveTokenSettings = (newToken, demoMode) => {
+      setToken(newToken);
+      setIsDemo(demoMode);
+      localStorage.setItem("hf_token", newToken);
+      localStorage.setItem("hf_is_demo", demoMode.toString());
+    };
+
     if (isPrintView) return children;
     const isFocused = focusedItemId === id;
+
+    const item = itemsArray[index];
+    let originalText = "";
+    if (type === "summary") {
+      originalText = personalInfo.summary || "";
+    } else if (type === "experience") {
+      originalText = item?.description || "";
+    } else if (type === "projects") {
+      originalText = item?.description || "";
+    } else if (type === "education") {
+      originalText = item?.details || "";
+    } else if (item) {
+      originalText = item.description || item.details || item.text || item.items || "";
+    }
+
+    const handleUpdateContent = (newValue) => {
+      if (type === "summary") {
+        const updated = { ...data };
+        updated.personalInfo = { ...updated.personalInfo, summary: newValue };
+        onChange(updated);
+      } else if (type === "experience") {
+        const updated = { ...data };
+        updated.experience = updated.experience.map((itm, idx) =>
+          idx === index ? { ...itm, description: newValue } : itm
+        );
+        onChange(updated);
+      } else if (type === "projects") {
+        const updated = { ...data };
+        updated.projects = updated.projects.map((itm, idx) =>
+          idx === index ? { ...itm, description: newValue } : itm
+        );
+        onChange(updated);
+      } else if (type === "education") {
+        const updated = { ...data };
+        updated.education = updated.education.map((itm, idx) =>
+          idx === index ? { ...itm, details: newValue } : itm
+        );
+        onChange(updated);
+      } else {
+        const itm = itemsArray[index];
+        if (itm) {
+          const updated = { ...data };
+          const fieldToUpdate = itm.description !== undefined ? "description" 
+                              : itm.details !== undefined ? "details"
+                              : itm.text !== undefined ? "text"
+                              : itm.items !== undefined ? "items"
+                              : null;
+          if (fieldToUpdate) {
+            const listName = type === "projects" ? "projects" : type;
+            if (updated[listName]) {
+              updated[listName] = updated[listName].map((e, idx) =>
+                idx === index ? { ...e, [fieldToUpdate]: newValue } : e
+              );
+              onChange(updated);
+            }
+          }
+        }
+      }
+    };
+
+    const executeAI = async (actionType, requestPrompt = "") => {
+      setAiLoading(true);
+      setAiError("");
+      setAiResult("");
+
+      let systemPrompt = "";
+      let userPrompt = "";
+
+      if (actionType === "improve") {
+        systemPrompt = "You are a professional resume writer and ATS optimization expert. Your task is to rewrite the user's resume bullet points to use strong action verbs, quantifiable achievements, and metrics. Keep it highly professional, concise, and structured as bullet points starting with '•'.";
+        userPrompt = `Please improve the writing and grammar for the following content. Keep it professional, polished, and concise:\n\n${originalText}`;
+      } else if (actionType === "review") {
+        systemPrompt = "You are an expert recruiter. Analyze the given text and provide a rewritten version that highlights key achievements, skills, and makes it sound highly desirable to hiring managers. Keep the output formatted as clean bullet points starting with '•'.";
+        userPrompt = `Please perform a recruiter review and rewrite the following content to highlight achievements and keywords:\n\n${originalText}`;
+      } else if (actionType === "inspire") {
+        systemPrompt = "You are a creative career coach. Rewrite the user's content to sound more inspiring, modern, and visionary, showing leadership and problem-solving skills.";
+        userPrompt = `Please rewrite the following content to sound more inspiring and leadership-oriented:\n\n${originalText}`;
+      } else if (actionType === "custom") {
+        systemPrompt = "You are a helpful AI resume assistant. Follow the user's custom instruction to rewrite the resume text. Return bullet points starting with '•' if applicable.";
+        userPrompt = `Rewrite the following text based on this custom request: "${requestPrompt}"\n\nOriginal Text:\n${originalText}`;
+      }
+
+      const getDemoResponse = (type, promptText) => {
+        if (type === "improve") {
+          return "• Engineered and launched responsive web interfaces using React and TailwindCSS, reducing load times by 35% and boosting monthly active users by 18%.\n• Optimized database performance by implementing caching, leading to a 20% reduction in query latencies.";
+        } else if (type === "review") {
+          return "• Spearheaded a cross-functional team of 6 engineers to deliver modern features on time, aligning development sprints with core business KPIs.\n• Analyzed system logs and user behaviour patterns to resolve critical bottlenecks, achieving 99.9% application uptime.";
+        } else if (type === "inspire") {
+          return "• Championed modern development methodologies and fostered a collaborative, high-performance team culture to drive digital transformation.\n• Pioneered innovative system architectures that empowered developers and delighted end-users alike.";
+        } else {
+          return `• Optimized content: "${originalText.replace(/^[•\-\s]*/, "")}" to align with custom request "${promptText}".`;
+        }
+      };
+
+      if (isDemo || !token) {
+        setTimeout(() => {
+          setAiResult(getDemoResponse(actionType, requestPrompt));
+          setAiLoading(false);
+        }, 1200);
+        return;
+      }
+
+      try {
+        const response = await fetch("https://router.huggingface.co/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 800
+          })
+        });
+
+        if (!response.ok) {
+          const errRes = await response.json().catch(() => ({}));
+          throw new Error(errRes.error?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const reply = result.choices?.[0]?.message?.content || "";
+        setAiResult(reply.trim());
+      } catch (err) {
+        setAiError(err.message || "Failed to make Hugging Face API call.");
+      } finally {
+        setAiLoading(false);
+      }
+    };
     
     return (
       <div 
@@ -267,6 +419,187 @@ export default function ResumePreview({ data, onChange = () => {}, onAIEnhance =
               </div>
             )}
           </>
+        )}
+
+        {/* Floating AI Assistant Capsule Button */}
+        {isFocused && (
+          <div className="absolute -left-[118px] top-6 z-30 no-print flex items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAiOpen(!isAiOpen);
+                setAiResult("");
+                setAiError("");
+              }}
+              className="flex items-center gap-1 bg-[#6366f1] hover:bg-[#4f46e5] text-white text-[11px] px-3 py-1.5 rounded-full font-bold shadow-md transition-all cursor-pointer whitespace-nowrap"
+            >
+              <Bot size={12} />
+              <span>AI Assistant</span>
+            </button>
+          </div>
+        )}
+
+        {/* Inline AI Assistant Popover card */}
+        {isFocused && isAiOpen && (
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="absolute -left-[320px] top-6 w-[290px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xl z-50 flex flex-col gap-3 text-slate-800 dark:text-slate-200 no-print cursor-default"
+          >
+            {/* Popover Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-2">
+              <div className="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-violet-600 animate-pulse" />
+                <span>AI Assistant</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setShowHfSettings(!showHfSettings)}
+                  className={`p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${showHfSettings ? "text-violet-600" : "text-slate-400"}`}
+                  title="AI Settings"
+                >
+                  <Settings size={12} />
+                </button>
+                <button 
+                  onClick={() => { setIsAiOpen(false); setAiResult(""); setAiError(""); }}
+                  className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            </div>
+
+            {/* HF Config overlay inside popover if settings clicked */}
+            {showHfSettings ? (
+              <div className="bg-slate-50 dark:bg-slate-950/40 p-2.5 rounded-xl space-y-2 border border-slate-100 dark:border-slate-800/60 text-[11px]">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-500">Demo Mode</span>
+                  <ToggleSwitch 
+                    checked={isDemo} 
+                    onChange={(checked) => saveTokenSettings(token, checked)} 
+                  />
+                </div>
+                {!isDemo && (
+                  <input
+                    type="password"
+                    value={token}
+                    onChange={(e) => saveTokenSettings(e.target.value, isDemo)}
+                    placeholder="hf_... (Hugging Face token)"
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded px-2 py-1 text-xs text-inherit focus:outline-none"
+                  />
+                )}
+                <div className="grid grid-cols-2 gap-1 mt-1">
+                  {["Qwen/Qwen2.5-7B-Instruct", "meta-llama/Llama-3-8B-Instruct"].map(model => (
+                    <button
+                      key={model}
+                      onClick={() => setSelectedModel(model)}
+                      className={`py-0.5 px-1 text-[8.5px] rounded border transition-all ${
+                        selectedModel === model 
+                          ? "border-violet-500 bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold" 
+                          : "border-slate-200 dark:border-slate-800 text-slate-400"
+                      }`}
+                    >
+                      {model.split("/")[1]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Popover suggestion result preview if loaded */}
+            {aiLoading ? (
+              <div className="py-6 flex flex-col items-center justify-center gap-2 text-slate-500">
+                <Loader2 className="animate-spin text-violet-500" size={18} />
+                <span className="text-[11px] font-semibold">Optimizing text...</span>
+              </div>
+            ) : aiError ? (
+              <div className="text-[11px] text-red-500 bg-red-50 dark:bg-red-950/20 p-2.5 rounded-xl border border-red-200/50">
+                {aiError}
+              </div>
+            ) : aiResult ? (
+              <div className="space-y-3">
+                <div className="text-[11.5px] text-slate-700 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-950/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-850 max-h-[140px] overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                  {aiResult}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      handleUpdateContent(aiResult);
+                      setIsAiOpen(false);
+                      setAiResult("");
+                    }}
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 transition-all cursor-pointer"
+                  >
+                    <Check size={11} /> Apply Change
+                  </button>
+                  <button
+                    onClick={() => { setAiResult(""); }}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-500 dark:text-slate-300 text-xs rounded-lg transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Options Menu */
+              <div className="flex flex-col gap-1.5">
+                <button
+                  onClick={() => executeAI("improve")}
+                  className="w-full py-2 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  <Wand2 size={12} className="text-violet-500" />
+                  <span>Improve Writing</span>
+                </button>
+                <button
+                  onClick={() => executeAI("review")}
+                  className="w-full py-2 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  <Smile size={12} className="text-violet-500" />
+                  <span>Recruiter Review</span>
+                </button>
+                <button
+                  onClick={() => executeAI("inspire")}
+                  className="w-full py-2 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-100 dark:border-slate-800/80 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  <Sparkles size={12} className="text-violet-500" />
+                  <span>Inspire Me</span>
+                </button>
+
+                <div className="flex items-center gap-2 py-1 text-slate-400 text-[10px] font-bold uppercase select-none">
+                  <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+                  <span>or</span>
+                  <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+                </div>
+
+                <div className="flex items-center border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 rounded-xl px-2.5 py-1.5 focus-within:border-indigo-500 transition-colors">
+                  <input
+                    type="text"
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && customPrompt.trim()) {
+                        executeAI("custom", customPrompt);
+                        setCustomPrompt("");
+                      }
+                    }}
+                    placeholder="Enter a custom request..."
+                    className="flex-1 bg-transparent border-none text-xs text-inherit focus:outline-none placeholder-slate-400 min-w-0"
+                  />
+                  <button
+                    onClick={() => {
+                      if (customPrompt.trim()) {
+                        executeAI("custom", customPrompt);
+                        setCustomPrompt("");
+                      }
+                    }}
+                    disabled={!customPrompt.trim()}
+                    className="text-violet-500 hover:text-violet-600 disabled:opacity-20 transition-all cursor-pointer"
+                  >
+                    <Send size={12} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         )}
         {children}
       </div>
